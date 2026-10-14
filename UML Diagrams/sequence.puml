@@ -1,0 +1,55 @@
+@startuml
+title Sequence Diagram - Graphic Design Assessment
+
+skinparam BackgroundColor transparent
+
+skinparam DefaultFontSize 30
+
+skinparam DefaultFontStyle bold
+
+actor User
+
+participant "Web Browser" as Browser
+participant "Flask Application" as Flask
+participant "Authentication" as Auth
+participant "Upload Module" as Upload
+participant "Computer Vision" as CV
+participant "AI Models" as AI
+participant "Assessment & Scoring" as Score
+participant "Feedback Module" as Feedback
+database "SQLite Database" as DB
+
+User -> Browser : Login
+Browser -> Flask : Submit Login Details
+Flask -> Auth : Verify Credentials
+Auth -> DB : Retrieve User
+DB --> Auth : User Account
+Auth --> Flask : Authentication Result
+Flask --> Browser : Dashboard
+
+User -> Browser : Upload Graphic Design
+Browser -> Flask : Send Image
+Flask -> Upload : Validate & Save Image
+Upload -> DB : Store Design Information
+
+Upload -> CV : Pre-process Image
+CV -> CV : Extract Visual Features
+CV --> Upload : Visual Features
+
+Upload -> AI : Send Image / Features
+AI -> AI : Perform AI Analysis
+AI --> Upload : AI Analysis Results
+
+Upload -> Score : Send Analysis Results
+Score -> Score : Evaluate Design Principles
+Score -> Score : Calculate Quality Score
+
+Score -> Feedback : Send Scores & Weaknesses
+Feedback -> Feedback : Generate Recommendations
+
+Feedback --> Flask : Feedback & Results
+Flask -> DB : Save Assessment
+Flask --> Browser : Display Results
+Browser --> User : View Score & Feedback
+
+@enduml

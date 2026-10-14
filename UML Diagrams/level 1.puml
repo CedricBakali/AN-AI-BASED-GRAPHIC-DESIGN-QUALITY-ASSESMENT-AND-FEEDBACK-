@@ -1,0 +1,52 @@
+@startuml
+title Data Flow Diagram - Level 1
+
+skinparam BackgroundColor transparent
+
+skinparam shadowing false
+
+rectangle "Normal User" as User
+rectangle "Administrator" as Admin
+
+database "D1: Users" as Users
+database "D2: Designs" as Designs
+database "D3: Assessments" as Assessments
+
+rectangle "1.0\nAuthentication" as P1
+rectangle "2.0\nDesign Upload &\nPre-processing" as P2
+rectangle "3.0\nAI & Computer Vision\nAnalysis" as P3
+rectangle "4.0\nAssessment &\nScoring" as P4
+rectangle "5.0\nFeedback Generation" as P5
+rectangle "6.0\nResults & History" as P6
+rectangle "7.0\nAdministration" as P7
+
+User --> P1 : Registration /\nLogin Details
+P1 --> Users : Store / Verify User
+Users --> P1 : User Account Data
+
+P1 --> User : Authentication Result
+
+User --> P2 : Graphic Design
+P2 --> Designs : Store Design
+Designs --> P2 : Design File
+
+P2 --> P3 : Pre-processed Image
+
+P3 --> P4 : Visual Features /\nAI Analysis
+
+P4 --> Assessments : Store Scores
+Assessments --> P4 : Assessment Data
+
+P4 --> P5 : Scores /\nWeaknesses
+P5 --> User : Recommendations /\nAI Feedback
+
+P5 --> P6 : Feedback
+P6 --> Assessments : Retrieve Results
+P6 --> User : Results /\nAssessment History
+
+Admin --> P7 : Management Requests
+P7 --> Users : User Management
+P7 --> Assessments : Assessment Monitoring
+P7 --> Admin : Reports /\nStatistics
+
+@enduml

@@ -10,3 +10,7 @@ static/uploads/*
 .venv/
 venv/
 .pytest_cache/
+# PlantUML tooling / generated output (keep only top-level .puml diagrams)
+*.jar
+UML Diagrams/plantuml/
+UML Diagrams/out/

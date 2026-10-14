@@ -1,0 +1,72 @@
+@startuml
+title Class Diagram - DesignScore
+
+
+skinparam BackgroundColor transparent
+
+left to right direction
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+skinparam classAttributeIconSize 0
+
+class User {
+    - id : int
+    - username : string
+    - email : string
+    - password_hash : string
+    - role : string
+    - created_at : datetime
+    --
+    + register()
+    + login()
+    + logout()
+    + updateProfile()
+}
+
+class Design {
+    - id : int
+    - user_id : int
+    - filename : string
+    - image_path : string
+    - uploaded_at : datetime
+    --
+    + upload()
+    + validate()
+}
+
+class Assessment {
+    - id : int
+    - design_id : int
+    - overall_score : float
+    - grade : string
+    - created_at : datetime
+    --
+    + assess()
+    + calculateScore()
+}
+
+class Feedback {
+    - id : int
+    - assessment_id : int
+    - recommendations : text
+    - weaknesses : text
+    --
+    + generateFeedback()
+    + generateRecommendations()
+}
+
+class Admin {
+    + manageUsers()
+    + monitorAssessments()
+    + generateReports()
+}
+
+User "1" --> "0..*" Design : uploads
+Design "1" --> "1" Assessment : receives
+Assessment "1" --> "1" Feedback : generates
+Admin --> User : manages
+Admin --> Assessment : monitors
+
+@enduml

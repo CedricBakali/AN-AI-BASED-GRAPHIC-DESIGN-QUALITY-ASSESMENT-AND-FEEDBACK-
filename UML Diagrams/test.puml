@@ -1,0 +1,67 @@
+@startuml
+
+skinparam BackgroundColor transparent
+
+
+title System Architecture Diagram
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+actor "Normal User" as User
+actor "Administrator" as Admin
+
+node "Web Browser" as Browser
+
+node "Flask Web Application" as Flask {
+
+    component "Authentication Module" as Auth
+    component "Dashboard Module" as Dashboard
+    component "Design Upload\n& Pre-processing" as Upload
+    component "AI Analysis Module" as AI
+    component "Assessment &\nScoring Module" as Scoring
+    component "Feedback Module" as Feedback
+    component "Assessment History" as History
+}
+
+node "AI & Computer Vision Layer" as Analysis {
+
+    component "OpenCV" as OpenCV
+    component "Pre-trained AI Models" as Models
+    component "Typography Analysis" as Typography
+    component "Colour Analysis" as Colour
+    component "Contrast Analysis" as Contrast
+    component "Layout Analysis" as Layout
+    component "White Space Analysis" as WhiteSpace
+    component "Visual Hierarchy Analysis" as Hierarchy
+}
+
+database "SQLite Database" as DB
+
+cloud "Pre-trained AI Models" as ExternalAI
+
+User --> Browser
+Admin --> Browser
+
+Browser --> Auth : Login / Register
+Auth --> Dashboard : Successful Login
+
+Dashboard --> Upload : Upload Design
+Upload --> Analysis : Process Image
+
+Analysis --> OpenCV
+Analysis --> Models
+Models --> ExternalAI
+
+Analysis --> Scoring : Analysis Results
+Scoring --> Feedback : Scores & Weaknesses
+
+Feedback --> History : Save Assessment
+Scoring --> DB : Store Scores
+History --> DB : Store / Retrieve Results
+Auth --> DB : User Accounts
+Dashboard --> DB : User Data
+
+Admin --> Dashboard : Admin Access
+
+@enduml
+

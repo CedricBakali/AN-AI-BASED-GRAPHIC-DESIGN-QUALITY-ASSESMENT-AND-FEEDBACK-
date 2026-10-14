@@ -1,0 +1,38 @@
+@startuml
+left to right direction
+
+skinparam DefaultFontSize 25
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+' External entity
+rectangle "USER" as User
+
+' Data stores
+database "D2\nDesign Data" as DesignDB
+database "D3\nAssessment Results" as ResultsDB
+
+' Processes
+rectangle "4.1\nRetrieve Design" as P41
+rectangle "4.2\nPre-process Image" as P42
+rectangle "4.3\nExtract Design Features" as P43
+rectangle "4.4\nAI-Based Design Analysis" as P44
+rectangle "4.5\nEvaluate Design Principles" as P45
+rectangle "4.6\nStore Analysis Results" as P46
+
+' Data flows
+User --> P41 : Design Request
+P41 --> DesignDB : Request Uploaded Design
+DesignDB --> P41 : Uploaded Design
+
+P41 --> P42 : Image
+P42 --> P43 : Processed Image
+
+P43 --> P44 : Extracted Features
+P44 --> P45 : AI Analysis Results
+
+P45 --> P46 : Scores & Findings
+P46 --> ResultsDB : Assessment Results
+
+@enduml

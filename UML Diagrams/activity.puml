@@ -1,0 +1,43 @@
+@startuml
+title Activity Diagram - Graphic Design Assessment
+
+start
+
+:Open DesignScore System;
+:Login / Register;
+
+if (Valid Login?) then (Yes)
+
+    :Display Dashboard;
+    :Select "Analyse Design";
+    :Upload Graphic Design;
+
+    if (Valid Image?) then (Yes)
+
+        :Pre-process Image;
+        :Extract Visual Features;
+        :Perform AI-Based Analysis;
+        :Assess Design Principles;
+        :Calculate Quality Score;
+        :Generate AI Feedback;
+        :Display Assessment Results;
+        :Save Assessment;
+
+    else (No)
+
+        :Display Upload Error;
+        :Request Valid Image;
+        :Upload Graphic Design;
+
+    endif
+
+else (No)
+
+    :Display Login Error;
+    :Login / Register;
+
+endif
+
+stop
+
+@enduml

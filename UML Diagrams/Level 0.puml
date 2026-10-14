@@ -1,0 +1,68 @@
+@startuml
+title Entity Relationship Diagram - DesignScore
+
+skinparam BackgroundColor transparent
+
+left to right direction
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+hide circle
+skinparam linetype ortho
+
+entity "USERS" as users {
+    * id : INTEGER <<PK>>
+    --
+    username : VARCHAR
+    email : VARCHAR <<UNIQUE>>
+    password_hash : VARCHAR
+    role : VARCHAR
+    created_at : DATETIME
+}
+
+entity "DESIGNS" as designs {
+    * id : INTEGER <<PK>>
+    --
+    user_id : INTEGER <<FK>>
+    filename : VARCHAR
+    image_path : VARCHAR
+    uploaded_at : DATETIME
+}
+
+entity "ASSESSMENTS" as assessments {
+    * id : INTEGER <<PK>>
+    --
+    design_id : INTEGER <<FK>>
+    overall_score : DECIMAL
+    grade : VARCHAR
+    created_at : DATETIME
+}
+
+entity "DESIGN_ANALYSIS" as analysis {
+    * id : INTEGER <<PK>>
+    --
+    assessment_id : INTEGER <<FK>>
+    typography_score : DECIMAL
+    colour_score : DECIMAL
+    contrast_score : DECIMAL
+    layout_score : DECIMAL
+    whitespace_score : DECIMAL
+    hierarchy_score : DECIMAL
+}
+
+entity "FEEDBACK" as feedback {
+    * id : INTEGER <<PK>>
+    --
+    assessment_id : INTEGER <<FK>>
+    weaknesses : TEXT
+    recommendations : TEXT
+    created_at : DATETIME
+}
+
+users ||--o{ designs : uploads
+designs ||--o| assessments : receives
+assessments ||--|| analysis : contains
+assessments ||--|| feedback : generates
+
+@enduml
