@@ -211,7 +211,7 @@
                     </div>
 
                     <div class="stat-number">
-                        0
+                        {{ total_designs }}
                     </div>
 
                     <p>
@@ -236,7 +236,7 @@
                     </div>
 
                     <div class="stat-number">
-                        0
+                        {{ assessments_completed }}
                     </div>
 
                     <p>
@@ -261,7 +261,7 @@
                     </div>
 
                     <div class="stat-number">
-                        —
+                        {% if average_score is not none %}{{ average_score }}{% else %}—{% endif %}
                     </div>
 
                     <p>
@@ -382,6 +382,16 @@
                 </div>
 
 
+                {% if assessments %}
+                <ul class="recent-list">
+                    {% for a in assessments[:5] %}
+                    <li>
+                        <a href="{{ url_for('result', analysis_id=a.id) }}">{{ a.filename }}</a>
+                        — {{ a.overall }}/100 ({{ a.grade }})
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
                 <div class="empty-state">
 
                     <div class="empty-icon">
@@ -398,6 +408,7 @@
                     </p>
 
                 </div>
+                {% endif %}
 
             </div>
 
