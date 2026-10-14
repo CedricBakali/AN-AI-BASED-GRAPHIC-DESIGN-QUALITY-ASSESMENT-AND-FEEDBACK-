@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DesignScore - Graphic Design Quality Assessment</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .login-link {
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border: 1px solid white;
+            border-radius: 6px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 20px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .hero h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            color: #666;
+            font-size: 18px;
+        }
+
+        .upload-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .upload-box h3 {
+            margin-top: 0;
+            font-size: 24px;
+        }
+
+        input[type="file"] {
+            margin: 25px 0;
+            padding: 12px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        button {
+            background: #111827;
+            color: white;
+            border: none;
+            padding: 13px 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #374151;
+        }
+
+        .links {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .links a {
+            margin: 0 10px;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .flash {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>DesignScore</h1>
+
+    <a class="login-link" href="{{ url_for('auth.login') }}">
+        Login
+    </a>
+</header>
+
+<div class="container">
+
+    <div class="hero">
+        <h2>Graphic Design Quality Assessment</h2>
+
+        <p>
+            Upload your graphic design and receive an assessment
+            based on important design principles.
+        </p>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="upload-box">
+
+        <h3>Analyse Your Design</h3>
+
+        <p>
+            Upload a poster, advertisement, flyer or social media graphic.
+        </p>
+
+        <form method="POST"
+              action="{{ url_for('analyze') }}"
+              enctype="multipart/form-data">
+
+            <input
+                type="file"
+                name="image"
+                accept=".png,.jpg,.jpeg,.webp,.bmp,.gif"
+                required
+            >
+
+            <br>
+
+            <button type="submit">
+                Analyse Design
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="links">
+        <a href="{{ url_for('history') }}">
+            Assessment History
+        </a>
+
+        <a href="{{ url_for('auth.register') }}">
+            Create Account
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>

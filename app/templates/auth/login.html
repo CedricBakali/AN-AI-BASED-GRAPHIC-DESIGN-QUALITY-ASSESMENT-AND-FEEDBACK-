@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login - DesignScore</title>
+
+    <!-- Login page CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+
+<body class="auth-page">
+
+    <!-- Background decorative elements -->
+    <div class="background-overlay"></div>
+    <div class="glow glow-one"></div>
+    <div class="glow glow-two"></div>
+
+
+    <!-- Main login area -->
+    <main class="auth-container">
+
+        <section class="auth-card">
+
+            <!-- Brand -->
+            <div class="auth-brand">
+
+                <div class="brand-mark">
+                    DS
+                </div>
+
+                <div>
+                    <h1>DesignScore</h1>
+                    <p>AI-Powered Design Assessment</p>
+                </div>
+
+            </div>
+
+
+            <!-- Login heading -->
+            <div class="auth-header">
+
+                <span class="welcome-label">WELCOME</span>
+
+                <h2>Sign in to your account</h2>
+
+                <p>
+                    Evaluate your designs and discover how to improve
+                    your creative work.
+                </p>
+
+            </div>
+
+
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+
+                    {% for message in messages %}
+
+                        <div class="flash-message">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+            {% endwith %}
+
+
+            <!-- Login form -->
+            <form method="POST"
+                  action="{{ url_for('auth.login') }}"
+                  class="auth-form">
+
+
+                <!-- Email -->
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">
+                            @
+                        </span>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Enter your email"
+                            autocomplete="email"
+                            required>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Password -->
+                <div class="form-group">
+
+                    <div class="password-label">
+
+                        <label for="password">
+                            Password
+                        </label>
+
+                        <a href="#" class="forgot-link">
+                            Forgot password?
+                        </a>
+
+                    </div>
+
+
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">
+                            •
+                        </span>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Login button -->
+                <button type="submit" class="auth-button">
+
+                    <span>Sign In</span>
+
+                    <span class="button-arrow">
+                        →
+                    </span>
+
+                </button>
+
+            </form>
+
+
+            <!-- Footer -->
+            <div class="auth-footer">
+
+                <p>
+                    New to DesignScore?
+                    <a href="{{ url_for('auth.register') }}">
+                        Create an account
+                    </a>
+                </p>
+
+                <div class="footer-divider">
+                    <span></span>
+                    <small>OR</small>
+                    <span></span>
+                </div>
+
+                <a href="#" class="admin-link">
+                    Administrator Login
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Small branding -->
+    <div class="page-brand">
+        <span>DesignScore</span>
+        <span>•</span>
+        <span>AI Graphic Design Assessment</span>
+    </div>
+
+</body>
+</html>

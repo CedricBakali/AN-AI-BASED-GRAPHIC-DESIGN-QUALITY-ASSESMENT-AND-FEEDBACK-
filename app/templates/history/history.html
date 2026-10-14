@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History - DesignScore</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header><a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></header>
+<main>
+<h1>Assessment History</h1>
+{% if records %}
+<ul>
+{% for rec in records %}
+<li><a href="{{ url_for('result', analysis_id=rec.id) }}">{{ rec.filename }}</a> — {{ rec.overall }}/100 ({{ rec.grade }}) — {{ rec.created_at }}</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>No assessments yet.</p>
+{% endif %}
+</main>
+</body>
+</html>

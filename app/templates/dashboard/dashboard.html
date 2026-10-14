@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard - DesignScore</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+
+<body class="dashboard-page">
+
+<div class="dashboard-layout">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <!-- Brand -->
+        <div class="sidebar-brand">
+
+            <div class="brand-icon">
+                Ds
+            </div>
+
+            <div>
+                <h2>DesignScore</h2>
+                <span>AI Design Assessment</span>
+            </div>
+
+        </div>
+
+
+        <!-- Navigation -->
+        <nav class="sidebar-nav">
+
+            <p class="nav-label">MAIN</p>
+
+            <a href="{{ url_for('dashboard.dashboard') }}"
+               class="nav-item active">
+
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+
+            </a>
+
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">+</span>
+                <span>Analyse Design</span>
+
+            </a>
+
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">◇</span>
+                <span>My Designs</span>
+
+            </a>
+
+
+            <a href="{{ url_for('history') }}"
+               class="nav-item">
+
+                <span class="nav-icon">◷</span>
+                <span>Assessment History</span>
+
+            </a>
+
+
+            <p class="nav-label nav-label-settings">
+                ACCOUNT
+            </p>
+
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">○</span>
+                <span>Profile</span>
+
+            </a>
+
+        </nav>
+
+
+        <!-- Sidebar bottom -->
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-tip">
+
+                <span class="tip-icon">✦</span>
+
+                <div>
+                    <strong>Design better</strong>
+                    <p>Use AI feedback to improve your work.</p>
+                </div>
+
+            </div>
+
+
+            <a href="{{ url_for('auth.logout') }}"
+               class="logout-link">
+
+                <span>↪</span>
+                Logout
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="dashboard-main">
+
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <div class="topbar-title">
+
+                <span class="mobile-menu">☰</span>
+
+                <div>
+                    <span class="page-label">WORKSPACE</span>
+                    <h3>Dashboard</h3>
+                </div>
+
+            </div>
+
+
+            <div class="topbar-user">
+
+                <div class="notification">
+                    ♢
+                </div>
+
+                <div class="user-avatar">
+                    U
+                </div>
+
+                <div class="user-info">
+                    <strong>User</strong>
+                    <span>Designer</span>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ================= CONTENT ================= -->
+
+        <section class="dashboard-content">
+
+
+            <!-- WELCOME -->
+
+            <div class="welcome-section">
+
+                <div>
+
+                    <span class="welcome-tag">
+                        DESIGN ANALYTICS
+                    </span>
+
+                    <h1>
+                        Welcome to <span>DesignScore</span>
+                    </h1>
+
+                    <p>
+                        Analyse your graphic designs and receive
+                        AI-based feedback to improve your digital
+                        creative skills.
+                    </p>
+
+                </div>
+
+                <div class="welcome-decoration">
+                    ✦
+                </div>
+
+            </div>
+
+
+            <!-- ================= STATISTICS ================= -->
+
+            <div class="stats-grid">
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            TOTAL DESIGNS
+                        </span>
+
+                        <div class="stat-icon blue">
+                            ◇
+                        </div>
+
+                    </div>
+
+                    <div class="stat-number">
+                        0
+                    </div>
+
+                    <p>
+                        Uploaded designs
+                    </p>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            ASSESSMENTS
+                        </span>
+
+                        <div class="stat-icon purple">
+                            ✓
+                        </div>
+
+                    </div>
+
+                    <div class="stat-number">
+                        0
+                    </div>
+
+                    <p>
+                        Completed assessments
+                    </p>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            AVERAGE SCORE
+                        </span>
+
+                        <div class="stat-icon green">
+                            ↗
+                        </div>
+
+                    </div>
+
+                    <div class="stat-number">
+                        —
+                    </div>
+
+                    <p>
+                        Overall design quality
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ================= ANALYSE DESIGN ================= -->
+
+            <div class="analyse-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            NEW ASSESSMENT
+                        </span>
+
+                        <h2>
+                            Analyse a New Design
+                        </h2>
+
+                        <p>
+                            Upload a completed poster, advertisement,
+                            flyer or social media graphic and let
+                            DesignScore evaluate its quality.
+                        </p>
+
+                    </div>
+
+
+                    <div class="analyse-icon">
+                        ✦
+                    </div>
+
+                </div>
+
+
+                <form
+                    action="{{ url_for('analyze') }}"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="upload-form">
+
+
+                    <label class="upload-area">
+
+                        <input
+                            type="file"
+                            name="image"
+                            accept="image/png,image/jpeg,image/webp"
+                            required>
+
+                        <div class="upload-icon">
+                            ↑
+                        </div>
+
+                        <h3>
+                            Upload your design
+                        </h3>
+
+                        <p>
+                            PNG, JPG or WEBP · Maximum 10 MB
+                        </p>
+
+                        <span class="choose-file">
+                            Choose Design
+                        </span>
+
+                    </label>
+
+
+                    <button
+                        type="submit"
+                        class="analyse-button">
+
+                        <span>Analyse Design</span>
+
+                        <span class="arrow">
+                            →
+                        </span>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- ================= RECENT ASSESSMENTS ================= -->
+
+            <div class="recent-card">
+
+                <div class="card-heading">
+
+                    <div>
+
+                        <span class="section-label">
+                            ACTIVITY
+                        </span>
+
+                        <h2>
+                            Recent Assessments
+                        </h2>
+
+                    </div>
+
+                    <a href="{{ url_for('history') }}">
+                        View History →
+                    </a>
+
+                </div>
+
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        ◇
+                    </div>
+
+                    <h3>
+                        No assessments yet
+                    </h3>
+
+                    <p>
+                        Your recent design assessments will appear
+                        here after you analyse your first design.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

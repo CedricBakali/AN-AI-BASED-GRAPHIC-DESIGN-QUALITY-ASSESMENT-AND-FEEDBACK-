@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DesignScore</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .welcome-card {
+            width: 90%;
+            max-width: 650px;
+            background: white;
+            padding: 60px 40px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 35px;
+        }
+
+        h1 {
+            font-size: 38px;
+            margin-bottom: 15px;
+        }
+
+        .description {
+            color: #6b7280;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .login {
+            background: #111827;
+            color: white;
+        }
+
+        .register {
+            background: white;
+            color: #111827;
+            border: 2px solid #111827;
+        }
+
+        .admin {
+            margin-top: 30px;
+            font-size: 14px;
+        }
+
+        .admin a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="welcome-card">
+
+        <div class="logo">
+            DesignScore
+        </div>
+
+        <h1>
+            Graphic Design Quality Assessment
+        </h1>
+
+        <p class="description">
+            An AI-based system for assessing graphic designs
+            and providing feedback to help improve digital
+            creative skills.
+        </p>
+
+        <div class="buttons">
+
+            <a href="{{ url_for('auth.login') }}" class="btn login">
+                Login
+            </a>
+
+            <a href="{{ url_for('auth.register') }}" class="btn register">
+                Register
+            </a>
+
+        </div>
+
+        <div class="admin">
+            <a href="#">Admin Login</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
