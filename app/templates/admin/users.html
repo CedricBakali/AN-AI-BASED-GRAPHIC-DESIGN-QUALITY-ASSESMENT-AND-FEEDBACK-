@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Users - DesignScore</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header><a href="{{ url_for('admin.dashboard') }}">Admin</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></header>
+<main>
+<h1>Users</h1>
+<table border="1" cellpadding="6">
+<tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Active</th><th>Assessments</th><th>Joined</th></tr>
+{% for u in users %}
+<tr>
+<td><a href="{{ url_for('admin.user_detail', user_id=u.id) }}">{{ u.id }}</a></td>
+<td>{{ u.username }}</td>
+<td>{{ u.email }}</td>
+<td>{{ u.role }}</td>
+<td>{{ 'yes' if u.is_active else 'no' }}</td>
+<td>{{ u.assessment_count }}</td>
+<td>{{ u.created_at }}</td>
+</tr>
+{% endfor %}
+</table>
+</main>
+</body>
+</html>

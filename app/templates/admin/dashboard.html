@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - DesignScore</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header><a href="{{ url_for('dashboard.dashboard') }}">My Dashboard</a> | <strong>Admin</strong> | <a href="{{ url_for('admin.users') }}">Users</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></header>
+<main>
+{% with messages = get_flashed_messages() %}{% if messages %}{% for message in messages %}<p><strong>{{ message }}</strong></p>{% endfor %}{% endif %}{% endwith %}
+<h1>Admin Dashboard</h1>
+<ul>
+<li>Total users: {{ stats.total_users }}</li>
+<li>Active users: {{ stats.active_users }}</li>
+<li>Total assessments: {{ stats.total_assessments }}</li>
+<li>Average score: {% if stats.average_score is not none %}{{ stats.average_score }}/100{% else %}—{% endif %}</li>
+</ul>
+<h2>Recent activity (all users)</h2>
+{% if recent %}
+<ul>
+{% for a in recent %}
+<li>#{{ a.id }} {{ a.filename }} — {{ a.overall }}/100 ({{ a.grade }}) — user {{ a.user_id }} — {{ a.created_at }}</li>
+{% endfor %}
+</ul>
+{% else %}<p>No assessments yet.</p>{% endif %}
+</main>
+</body>
+</html>

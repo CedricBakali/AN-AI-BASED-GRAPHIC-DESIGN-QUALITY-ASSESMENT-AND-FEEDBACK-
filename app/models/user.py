@@ -177,7 +177,6 @@ def is_user_active(user_id: int) -> bool:
 # =========================================================
 # GET USER ROLE
 # =========================================================
-
 def get_user_role(user_id: int) -> str | None:
     """
     Return the role of a user.
@@ -202,3 +201,29 @@ def get_user_role(user_id: int) -> str | None:
             return None
 
         return row["role"]
+
+
+# =========================================================
+# SET ACCOUNT ACTIVE / DISABLED (ADMIN)
+# =========================================================
+
+def set_user_active(user_id: int, active: bool) -> bool:
+    """
+    Enable or disable a user account.
+
+    Returns:
+        True if a row was updated, False otherwise.
+    """
+
+    with get_connection() as conn:
+
+        cursor = conn.execute(
+            """
+            UPDATE users
+            SET is_active = ?
+            WHERE id = ?
+            """,
+            (1 if active else 0, user_id)
+        )
+
+        return cursor.rowcount > 0

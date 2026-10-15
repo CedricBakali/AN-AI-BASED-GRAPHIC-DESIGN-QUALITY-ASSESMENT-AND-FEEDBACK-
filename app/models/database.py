@@ -218,7 +218,6 @@ def get_history(
 # =========================================================
 # GET ONE ANALYSIS
 # =========================================================
-
 def get_analysis(
     analysis_id: int,
     user_id: int
@@ -246,3 +245,85 @@ def get_analysis(
             return None
 
         return _row_to_dict(row)
+
+
+# =========================================================
+# ADMIN: SYSTEM STATISTICS
+# =========================================================
+
+def get_stats() -> dict:
+    """Counts and averages across ALL users (admin only)."""
+
+    with get_connection() as conn:
+
+        total_users = conn.execute(
+            "SELECT COUNT(*) FROM users"
+        ).fetchone()[0]
+
+        active_users = conn.execute(
+            "SELECT COUNT(*) FROM users WHERE is_active = 1"
+        ).fetchone()[0]
+
+        total_assessments = conn.execute(
+            "SELECT COUNT(*) FROM analyses"
+        ).fetchone()[0]
+
+        avg_overall = conn.execute(
+            "SELECT AVG(overall) FROM analyses"
+        ).fetchone()[0]
+
+        return {
+            "total_users": total_users,
+            "active_users": active_users,
+            "total_assessments": total_assessments,
+            "average_score": round(avg_overall) if avg_overall is not None else None,
+        }
+
+
+# =========================================================
+# ADMIN: ALL USERS WITH ASSESSMENT COUNTS
+# =========================================================
+
+def get_all_users_with_counts() -> list[dict]:
+    """Every user plus how many assessments each owns (admin only)."""
+
+    with get_connection() as conn:
+
+        rows = conn.execute(
+            """
+            SELECT u.id, u.username, u.email, u.role,
+                   u.is_active, u.created_at,
+                   COUNT(a.id) AS assessment_count
+            FROM users u
+            LEFT JOIN analyses a ON a.user_id = u.id
+            GROUP BY u.id
+            ORDER BY u.id
+            """
+        ).fetchall()
+
+        return [dict(row) for row in rows]
+
+
+# =========================================================
+# ADMIN: RECENT ASSESSMENTS ACROSS ALL USERS
+# =========================================================
+
+def get_recent_assessments(limit: int = 10) -> list[dict]:
+    """Latest assessments from every user (admin only)."""
+
+    with get_connection() as conn:
+
+        rows = conn.execute(
+            """
+            SELECT *
+            FROM analyses
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (limit,)
+        ).fetchall()
+
+        return [
+            _row_to_dict(row)
+            for row in rows
+        ]

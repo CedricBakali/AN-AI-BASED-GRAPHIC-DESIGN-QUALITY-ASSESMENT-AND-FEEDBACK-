@@ -3,6 +3,7 @@ from functools import wraps
 
 from flask import (
     Blueprint,
+    abort,
     render_template,
     request,
     redirect,
@@ -14,6 +15,7 @@ from flask import (
 from app.models.user import (
     create_user,
     get_user_by_email,
+    get_user_by_id,
     check_password
 )
 
@@ -41,6 +43,37 @@ def login_required(view):
         if "user_id" not in session:
             flash("Please log in first.")
             return redirect(url_for("auth.login"))
+
+        return view(*args, **kwargs)
+
+    return wrapped
+
+
+# =========================================================
+# ADMIN REQUIRED DECORATOR
+# =========================================================
+
+def admin_required(view):
+    """
+    Protect a route so that only administrators
+    can access it. Must be stacked UNDER @login_required.
+
+    The role is re-read from the database (not trusted
+    from the session) so a demoted admin loses access
+    immediately and disabled accounts are blocked.
+    """
+
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+
+        user = get_user_by_id(session.get("user_id"))
+
+        if user is None or not user["is_active"]:
+            flash("Please log in first.")
+            return redirect(url_for("auth.login"))
+
+        if user["role"] != "admin":
+            abort(403)
 
         return view(*args, **kwargs)
 

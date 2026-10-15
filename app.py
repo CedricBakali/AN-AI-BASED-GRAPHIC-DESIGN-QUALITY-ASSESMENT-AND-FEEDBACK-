@@ -18,6 +18,7 @@ from app.services.analysis import analyze_image
 from app.services.feedback import build_feedback
 from app.routes.auth import auth_bp, login_required
 from app.routes.dashboard import dashboard_bp
+from app.routes.admin import admin_bp
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -39,6 +40,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 database.init_db()
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
+app.register_blueprint(admin_bp)
 
 
 def _allowed(filename: str) -> bool:
