@@ -14,14 +14,23 @@
 <img src="/{{ r.image_path }}" alt="uploaded design" style="max-width:400px">
 <h2>Palette</h2>
 <div>{% for c in r.palette %}<span style="display:inline-block;width:40px;height:40px;background:{{ c }}" title="{{ c }}"></span>{% endfor %}</div>
-<h2>Scores</h2>
+<h2>Category scores</h2>
 {% for cat in r.categories %}
 <section>
 <h3>{{ cat.name }}: {{ cat.score }}/100</h3>
 <p>{{ cat.summary }}</p>
-<ul>{% for s in cat.suggestions %}<li>{{ s }}</li>{% endfor %}</ul>
 </section>
 {% endfor %}
+<h2>Strengths</h2>
+{% if fb.strengths %}
+<ul>{% for s in fb.strengths %}<li><strong>{{ s.name }} ({{ s.score }}/100):</strong> {{ s.summary }}</li>{% endfor %}</ul>
+{% else %}<p>No category reached 75 yet — see recommendations below.</p>{% endif %}
+<h2>Weaknesses</h2>
+{% if fb.weaknesses %}
+<ul>{% for w in fb.weaknesses %}<li><strong>{{ w.name }} ({{ w.score }}/100):</strong> {{ w.summary }}</li>{% endfor %}</ul>
+{% else %}<p>No serious weaknesses. Good work.</p>{% endif %}
+<h2>Recommendations</h2>
+<ol>{% for rec in fb.recommendations %}<li><strong>{{ rec.category }}:</strong> {{ rec.text }}</li>{% endfor %}</ol>
 </main>
 </body>
 </html>

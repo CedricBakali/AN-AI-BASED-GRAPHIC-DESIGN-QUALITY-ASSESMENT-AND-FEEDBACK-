@@ -15,6 +15,7 @@ from werkzeug.utils import secure_filename
 
 from app.models import database
 from app.services.analysis import analyze_image
+from app.services.feedback import build_feedback
 from app.routes.auth import auth_bp, login_required
 from app.routes.dashboard import dashboard_bp
 
@@ -90,7 +91,8 @@ def result(analysis_id: int):
     record = database.get_analysis(analysis_id, session["user_id"])
     if record is None:
         abort(404)
-    return render_template("analysis/result.html", r=record)
+    fb = build_feedback(record["categories"])
+    return render_template("analysis/result.html", r=record, fb=fb)
 
 
 @app.route("/history")
