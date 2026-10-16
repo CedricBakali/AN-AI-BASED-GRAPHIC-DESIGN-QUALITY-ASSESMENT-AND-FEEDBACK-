@@ -78,6 +78,17 @@
             </p>
 
 
+            {% if user and user['role'] == 'admin' %}
+            <a href="{{ url_for('admin.dashboard') }}"
+               class="nav-item">
+
+                <span class="nav-icon">★</span>
+                <span>Admin Panel</span>
+
+            </a>
+            {% endif %}
+
+
             <a href="#" class="nav-item">
 
                 <span class="nav-icon">○</span>
@@ -317,6 +328,7 @@
 
                         <input
                             type="file"
+                            id="design-input"
                             name="image"
                             accept="image/png,image/jpeg,image/webp"
                             required>
@@ -336,6 +348,12 @@
                         <span class="choose-file">
                             Choose Design
                         </span>
+
+                        <div id="file-preview" style="display:none">
+                            <img id="preview-img" alt="Selected design preview">
+                            <p id="preview-name"></p>
+                            <p id="preview-error"></p>
+                        </div>
 
                     </label>
 
@@ -418,6 +436,35 @@
     </main>
 
 </div>
+
+<script>
+(function () {
+    var input = document.getElementById("design-input");
+    var box = document.getElementById("file-preview");
+    var img = document.getElementById("preview-img");
+    var name = document.getElementById("preview-name");
+    var err = document.getElementById("preview-error");
+    if (!input) return;
+    input.addEventListener("change", function () {
+        var file = input.files && input.files[0];
+        err.textContent = "";
+        if (!file) { box.style.display = "none"; return; }
+        if (file.size > 10 * 1024 * 1024) {
+            err.textContent = "That file is over 10 MB — pick a smaller one.";
+            box.style.display = "block";
+            img.removeAttribute("src");
+            name.textContent = file.name;
+            input.value = "";
+            return;
+        }
+        name.textContent = file.name + " (" + Math.round(file.size / 1024) + " KB)";
+        if (file.type.indexOf("image/") === 0) {
+            img.src = URL.createObjectURL(file);
+        }
+        box.style.display = "block";
+    });
+})();
+</script>
 
 </body>
 </html>
