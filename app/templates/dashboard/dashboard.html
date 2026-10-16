@@ -155,12 +155,12 @@
                 </div>
 
                 <div class="user-avatar">
-                    U
+                    {{ user['username'][0]|upper if user else 'U' }}
                 </div>
 
                 <div class="user-info">
-                    <strong>User</strong>
-                    <span>Designer</span>
+                    <strong>{{ user['username'] if user else 'User' }}</strong>
+                    <span>{% if user and user['role'] == 'admin' %}Administrator{% else %}Designer{% endif %}</span>
                 </div>
 
             </div>
