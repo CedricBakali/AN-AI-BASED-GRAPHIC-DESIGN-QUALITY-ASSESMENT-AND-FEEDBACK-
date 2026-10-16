@@ -17,6 +17,8 @@ import cv2
 import numpy as np
 from PIL import Image
 
+from app.services.scoring import compute_overall, grade_for
+
 
 # --------------------------------------------------------------------------- #
 # Data containers
@@ -420,16 +422,121 @@ def score_readability(contrast: CategoryResult, white_space: CategoryResult,
     return CategoryResult("Readability", score, summary, suggestions)
 
 
-def _grade(score: int) -> str:
-    if score >= 90:
-        return "A - Excellent"
-    if score >= 80:
-        return "B - Good"
-    if score >= 70:
-        return "C - Fair"
-    if score >= 60:
-        return "D - Needs work"
-    return "E - Poor"
+# --------------------------------------------------------------------------- #
+# Principle 7 - Layout (compositional structure)
+# --------------------------------------------------------------------------- #
+def score_layout(img: np.ndarray) -> CategoryResult:
+    """Reward a structured composition: content spread across the 3x3 grid
+    (rule-of-thirds balance) with focal energy near the thirds intersections
+    rather than dumped in one corner or dead centre."""
+    suggestions: List[str] = []
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    edges = cv2.Canny(gray, 80, 180).astype(np.float64)
+    h, w = edges.shape
+    if edges.sum() <= 0:
+        return CategoryResult(
+            "Layout", 70,
+            "Almost no detectable structure; layout not strongly assessed.",
+            ["Add a clear focal element so the composition has structure."],
+        )
+
+    # 3x3 grid balance.
+    cells = []
+    for r in range(3):
+        for c_ in range(3):
+            cells.append(edges[h * r // 3: h * (r + 1) // 3,
+                               w * c_ // 3: w * (c_ + 1) // 3].mean())
+    cells = np.array(cells) + 1e-6
+    balance = 1.0 - min(1.0, (cells.std() / cells.mean()) / 2.0)
+
+    # Focal energy near the four thirds intersections.
+    yy, xx = np.nonzero(edges)
+    total = len(xx)
+    pts = np.stack([xx / w, yy / h], axis=1)
+    thirds = np.array([[1 / 3, 1 / 3], [2 / 3, 1 / 3],
+                       [1 / 3, 2 / 3], [2 / 3, 2 / 3]])
+    dists = np.linalg.norm(pts[:, None, :] - thirds[None, :, :], axis=2).min(axis=1)
+    near_thirds = float((dists < 0.18).sum() / total)
+
+    score = int(round(100 * (0.55 * balance + 0.45 * min(1.0, near_thirds * 2.2))))
+    score = max(0, min(100, score))
+
+    summary = (f"Grid balance {balance*100:.0f}%; "
+               f"{near_thirds*100:.0f}% of detail near thirds intersections.")
+    if balance < 0.5:
+        suggestions.append(
+            "Content is bunched in one area. Spread elements across the "
+            "canvas so no third of the design sits empty while another overflows."
+        )
+    if near_thirds < 0.15:
+        suggestions.append(
+            "Try placing the main subject near a rule-of-thirds intersection "
+            "instead of dead centre for a more dynamic composition."
+        )
+    if not suggestions:
+        suggestions.append("Composition is well structured across the grid.")
+    return CategoryResult("Layout", score, summary, suggestions)
+
+
+# --------------------------------------------------------------------------- #
+# Principle 8 - Visual hierarchy (focal dominance)
+# --------------------------------------------------------------------------- #
+def score_visual_hierarchy(img: np.ndarray) -> CategoryResult:
+    """Reward one clear focal point: the largest visual mass should clearly
+    dominate the secondary elements and sit where the eye lands first
+    (upper part of the design for posters and flyers)."""
+    suggestions: List[str] = []
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    edges = cv2.Canny(gray, 80, 180)
+    dilated = cv2.dilate(edges, np.ones((5, 5), np.uint8), iterations=2)
+    contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL,
+                                   cv2.CHAIN_APPROX_SIMPLE)
+    areas = sorted([cv2.contourArea(c) for c in contours if cv2.contourArea(c) > 50],
+                   reverse=True)
+    if len(areas) < 3:
+        return CategoryResult(
+            "Visual Hierarchy", 70,
+            "Too few distinct elements to judge hierarchy.",
+            ["Give the design one dominant headline or image so the eye "
+             "knows where to start."],
+        )
+
+    top = np.array(areas[:8], dtype=np.float64)
+    dominance = float(top[0] / (np.median(top[1:]) + 1e-6))
+    if dominance >= 4.0:
+        dom_score, dom_note = 88, "one element clearly dominates"
+    elif dominance >= 2.0:
+        dom_score, dom_note = 72, "focal element is moderately dominant"
+    else:
+        dom_score, dom_note = 55, "no element clearly dominates"
+
+    biggest = max((c for c in contours if cv2.contourArea(c) > 50),
+                  key=cv2.contourArea)
+    _, cy, _, ch = cv2.boundingRect(biggest)
+    centre_y = (cy + ch / 2) / img.shape[0]
+    position_bonus = 6 if centre_y < 0.6 else 0
+
+    score = max(0, min(100, int(round(dom_score + position_bonus))))
+    summary = (f"Focal dominance ratio {dominance:.1f}:1 ({dom_note}); "
+               f"main element sits at {centre_y*100:.0f}% height.")
+    if dominance < 2.0:
+        suggestions.append(
+            "Everything competes at the same size. Enlarge the single most "
+            "important message or image so it is 2-4x bigger than the rest."
+        )
+    if centre_y >= 0.6:
+        suggestions.append(
+            "The biggest element sits low on the canvas. Move the headline "
+            "or hero image higher so viewers meet it first."
+        )
+    if not suggestions:
+        suggestions.append("Clear focal point guides the eye well.")
+    return CategoryResult("Visual Hierarchy", score, summary, suggestions)
+
+
+# --------------------------------------------------------------------------- #
+# Grade mapping lives in app/services/scoring.py (Module 5).
+# --------------------------------------------------------------------------- #
 
 
 # --------------------------------------------------------------------------- #
@@ -446,14 +553,17 @@ def analyze_image(path: str) -> AnalysisResult:
     alignment = score_alignment(img)
     typography = score_typography(img)
     readability = score_readability(contrast, white_space, typography)
+    layout = score_layout(img)
+    hierarchy = score_visual_hierarchy(img)
 
-    categories = [contrast, harmony, typography, alignment, white_space, readability]
-    overall = int(round(sum(c.score for c in categories) / len(categories)))
+    categories = [contrast, harmony, typography, alignment, white_space,
+                  readability, layout, hierarchy]
+    overall = compute_overall([c.score for c in categories])
     palette_hex = [_rgb_to_hex(rgb) for rgb, frac in palette if frac >= 0.03]
 
     return AnalysisResult(
         overall=overall,
-        grade=_grade(overall),
+        grade=grade_for(overall),
         categories=categories,
         palette=palette_hex,
     )
