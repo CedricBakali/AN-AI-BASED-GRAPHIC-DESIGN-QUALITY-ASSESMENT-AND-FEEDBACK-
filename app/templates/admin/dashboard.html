@@ -23,7 +23,7 @@
 </div>
 <h2>Recent activity (all users)</h2>
 {% if recent %}
-<ul>
+<ul class="activity">
 {% for a in recent %}
 <li>#{{ a.id }} {{ a.filename }} — {{ a.overall }}/100 ({{ a.grade }}) — user {{ a.user_id }} — {{ a.created_at }}</li>
 {% endfor %}

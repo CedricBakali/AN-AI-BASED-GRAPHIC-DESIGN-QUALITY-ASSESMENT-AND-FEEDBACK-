@@ -5,32 +5,56 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Result - DesignScore</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
 </head>
 <body>
-<header><a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a> | <a href="{{ url_for('history') }}">History</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></header>
-<main>
-<h1>{{ r.filename }} — {{ r.overall }}/100 ({{ r.grade }})</h1>
-<p>Analyzed: {{ r.created_at }}</p>
-<img src="/{{ r.image_path }}" alt="uploaded design" style="max-width:400px">
-<h2>Palette</h2>
-<div>{% for c in r.palette %}<span style="display:inline-block;width:40px;height:40px;background:{{ c }}" title="{{ c }}"></span>{% endfor %}</div>
+<header class="report-top">
+<span class="brand">DesignScore · Assessment Report</span>
+<nav><a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a><a href="{{ url_for('history') }}">History</a><a href="{{ url_for('auth.logout') }}">Logout</a></nav>
+</header>
+<main class="report">
+<section class="hero">
+<img src="/{{ r.image_path }}" alt="Uploaded design: {{ r.filename }}">
+<div>
+<div class="score-line">
+<span class="big">{{ r.overall }}<small>/100</small></span>
+<span class="grade g-{{ r.grade[0]|lower }}">{{ r.grade }}</span>
+</div>
+<h1>{{ r.filename }}</h1>
+<p class="date">Analyzed: {{ r.created_at }}</p>
+<div class="palette">{% for c in r.palette %}<span style="background:{{ c }}" title="{{ c }}"></span>{% endfor %}</div>
+</div>
+</section>
+
 <h2>Category scores</h2>
+<div class="cards">
 {% for cat in r.categories %}
-<section>
-<h3>{{ cat.name }}: {{ cat.score }}/100</h3>
+<section class="card">
+<h3>{{ cat.name }} <span class="v">{{ cat.score }}/100</span></h3>
 <p>{{ cat.summary }}</p>
+<div class="bar {% if cat.score >= 75 %}good{% elif cat.score >= 60 %}mid{% else %}low{% endif %}"><i style="width:{{ cat.score }}%"></i></div>
 </section>
 {% endfor %}
-<h2>Strengths</h2>
+</div>
+
+<section class="panel strengths">
+<h2>✓ Strengths</h2>
 {% if fb.strengths %}
 <ul>{% for s in fb.strengths %}<li><strong>{{ s.name }} ({{ s.score }}/100):</strong> {{ s.summary }}</li>{% endfor %}</ul>
-{% else %}<p>No category reached 75 yet — see recommendations below.</p>{% endif %}
-<h2>Weaknesses</h2>
+{% else %}<p class="muted">No category reached 75 yet — see recommendations below.</p>{% endif %}
+</section>
+
+<section class="panel weaknesses">
+<h2>! Weaknesses</h2>
 {% if fb.weaknesses %}
 <ul>{% for w in fb.weaknesses %}<li><strong>{{ w.name }} ({{ w.score }}/100):</strong> {{ w.summary }}</li>{% endfor %}</ul>
-{% else %}<p>No serious weaknesses. Good work.</p>{% endif %}
-<h2>Recommendations</h2>
+{% else %}<p class="muted">No serious weaknesses. Good work.</p>{% endif %}
+</section>
+
+<section class="panel reco">
+<h2>→ Recommendations</h2>
 <ol>{% for rec in fb.recommendations %}<li><strong>{{ rec.category }}:</strong> {{ rec.text }}</li>{% endfor %}</ol>
+</section>
 </main>
 </body>
 </html>

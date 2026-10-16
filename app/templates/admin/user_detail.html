@@ -14,11 +14,13 @@
 </header>
 <main class="admin-wrap">
 {% with messages = get_flashed_messages() %}{% if messages %}{% for message in messages %}<p><strong>{{ message }}</strong></p>{% endfor %}{% endif %}{% endwith %}
+<div class="admin-detail">
 <h1>{{ user.username }} ({{ user.email }})</h1>
-<p>Role: {{ user.role }} | Active: {{ 'yes' if user.is_active else 'no' }} | Joined: {{ user.created_at }}</p>
+<p class="meta">Role: {{ user.role }} | Active: {{ 'yes' if user.is_active else 'no' }} | Joined: {{ user.created_at }}</p>
 <form action="{{ url_for('admin.toggle_user', user_id=user.id) }}" method="POST">
 <button type="submit">{% if user.is_active %}Disable account{% else %}Enable account{% endif %}</button>
 </form>
+</div>
 <h2>Assessments ({{ assessments|length }})</h2>
 {% if assessments %}
 <ul>
