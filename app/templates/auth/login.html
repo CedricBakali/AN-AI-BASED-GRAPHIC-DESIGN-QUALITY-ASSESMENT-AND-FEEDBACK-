@@ -167,9 +167,17 @@
                     <span></span>
                 </div>
 
-                <p class="admin-link">
-                    Administrator? Sign in above — admins use the same form.
-                </p>
+                <div class="admin-box">
+                    <small>ADMINISTRATORS</small>
+                    <p class="admin-link">
+                        Admins sign in with the same form.
+                        Enter your admin email + password, then Sign In —
+                        the system opens the admin panel automatically.
+                    </p>
+                    <button type="button" id="admin-goto" class="admin-button">
+                        Go to Admin Sign In →
+                    </button>
+                </div>
 
             </div>
 
@@ -184,6 +192,18 @@
         <span>•</span>
         <span>AI Graphic Design Assessment</span>
     </div>
+
+<script>
+(function () {
+    var btn = document.getElementById("admin-goto");
+    var email = document.getElementById("email");
+    if (!btn || !email) return;
+    btn.addEventListener("click", function () {
+        email.scrollIntoView({ behavior: "smooth", block: "center" });
+        email.focus();
+    });
+})();
+</script>
 
 </body>
 </html>

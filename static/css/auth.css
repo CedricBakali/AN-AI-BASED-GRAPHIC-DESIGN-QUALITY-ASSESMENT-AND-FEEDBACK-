@@ -639,6 +639,50 @@ body {
 }
 
 
+.admin-box {
+
+    text-align: center;
+
+    margin-top: 6px;
+}
+
+
+.admin-box small {
+
+    font-size: 10px;
+
+    letter-spacing: 2px;
+
+    color: rgba(255,255,255,0.4);
+}
+
+
+.admin-button {
+
+    margin-top: 8px;
+
+    background: transparent;
+
+    border: 1px solid rgba(125,211,252,0.5);
+
+    color: #7dd3fc;
+
+    padding: 10px 18px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+}
+
+
+.admin-button:hover {
+
+    background: rgba(125,211,252,0.12);
+}
+
+
 /* =========================================================
    PAGE BRAND
    ========================================================= */
