@@ -1,0 +1,33 @@
+/* Admin identity: dark slate + amber badge. Linked only by admin pages. */
+.admin-bar {
+    background: #1a1512;
+    border-bottom: 3px solid #ffb224;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.admin-bar .badge {
+    background: #ffb224;
+    color: #1a1512;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    border-radius: 3px;
+}
+.admin-bar nav a { margin-right: 16px; }
+.admin-wrap { max-width: 960px; margin: 24px auto; padding: 0 20px; }
+.stat-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stat-tile {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-top: 4px solid #ffb224;
+    padding: 14px;
+}
+.stat-tile small { color: #666; letter-spacing: 1px; font-size: 11px; }
+.stat-tile .n { font-size: 30px; font-weight: 800; }
+.admin-table { border-collapse: collapse; width: 100%; }
+.admin-table th { background: #1a1512; color: #ffb224; text-align: left; }
+.admin-table tr:nth-child(even) { background: #f6f1e7; }
+@media (max-width: 700px) { .stat-tiles { grid-template-columns: 1fr 1fr; } }

@@ -5,12 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Manage Users - DesignScore</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 </head>
 <body>
-<header><a href="{{ url_for('admin.dashboard') }}">Admin</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></header>
-<main>
+<header class="admin-bar">
+<span class="badge">★ ADMIN</span>
+<nav><a href="{{ url_for('admin.dashboard') }}">Panel</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></nav>
+</header>
+<main class="admin-wrap">
 <h1>Users</h1>
-<table border="1" cellpadding="6">
+<table class="admin-table" border="1" cellpadding="6">
 <tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Active</th><th>Assessments</th><th>Joined</th></tr>
 {% for u in users %}
 <tr>

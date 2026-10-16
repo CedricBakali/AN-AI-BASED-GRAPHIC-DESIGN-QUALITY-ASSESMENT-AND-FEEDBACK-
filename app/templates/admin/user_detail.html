@@ -5,10 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>User Detail - DesignScore</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 </head>
 <body>
-<header><a href="{{ url_for('admin.dashboard') }}">Admin</a> | <a href="{{ url_for('admin.users') }}">Users</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></header>
-<main>
+<header class="admin-bar">
+<span class="badge">★ ADMIN</span>
+<nav><a href="{{ url_for('admin.dashboard') }}">Panel</a> | <a href="{{ url_for('admin.users') }}">Users</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></nav>
+</header>
+<main class="admin-wrap">
 {% with messages = get_flashed_messages() %}{% if messages %}{% for message in messages %}<p><strong>{{ message }}</strong></p>{% endfor %}{% endif %}{% endwith %}
 <h1>{{ user.username }} ({{ user.email }})</h1>
 <p>Role: {{ user.role }} | Active: {{ 'yes' if user.is_active else 'no' }} | Joined: {{ user.created_at }}</p>
