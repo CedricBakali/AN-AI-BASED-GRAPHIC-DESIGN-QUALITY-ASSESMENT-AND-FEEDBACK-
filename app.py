@@ -9,7 +9,7 @@ from __future__ import annotations
 import os
 import uuid
 
-from flask import (Flask, abort, flash, redirect, render_template, request,
+from flask import (Flask, abort, flash, jsonify, redirect, render_template, request,
                    session, url_for)
 from werkzeug.utils import secure_filename
 
@@ -58,16 +58,24 @@ def index():
 @app.route("/analyze", methods=["POST"])
 @login_required
 def analyze():
-    if "image" not in request.files:
-        flash("No file was uploaded.")
+    # The JS uploader sends X-Requested-With so it can show a progress bar and
+    # handle errors inline. A plain browser form still gets the normal
+    # redirect + flash behaviour.
+    wants_json = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    def fail(message: str):
+        if wants_json:
+            return jsonify({"ok": False, "message": message}), 400
+        flash(message)
         return redirect(url_for("dashboard.dashboard"))
+
+    if "image" not in request.files:
+        return fail("No file was uploaded.")
     file = request.files["image"]
     if not file or file.filename == "":
-        flash("Please choose an image to analyze.")
-        return redirect(url_for("dashboard.dashboard"))
+        return fail("Please choose an image to analyze.")
     if not _allowed(file.filename):
-        flash("Unsupported file type. Use PNG, JPG, WEBP, BMP or GIF.")
-        return redirect(url_for("dashboard.dashboard"))
+        return fail("Unsupported file type. Use PNG, JPG, WEBP, BMP or GIF.")
 
     safe = secure_filename(file.filename)
     unique = f"{uuid.uuid4().hex}_{safe}"
@@ -80,10 +88,14 @@ def analyze():
     try:
         result = analyze_image(abs_path)
     except Exception as exc:  # noqa: BLE001 - surface a friendly message
-        flash(f"Could not analyze that image: {exc}")
-        return redirect(url_for("dashboard.dashboard"))
+        return fail(f"Could not analyze that image: {exc}")
 
     analysis_id = database.save_analysis(session["user_id"], safe, rel_path, result)
+    if wants_json:
+        return jsonify({
+            "ok": True,
+            "url": url_for("result", analysis_id=analysis_id),
+        })
     return redirect(url_for("result", analysis_id=analysis_id))
 
 
@@ -106,7 +118,10 @@ def history():
 
 @app.errorhandler(413)
 def too_large(_e):
-    flash("That file is too large (max 10 MB).")
+    message = "That file is too large (max 10 MB)."
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify({"ok": False, "message": message}), 413
+    flash(message)
     return redirect(url_for("dashboard.dashboard"))
 
 

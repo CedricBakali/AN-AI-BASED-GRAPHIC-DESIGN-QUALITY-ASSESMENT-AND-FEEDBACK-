@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>History - DesignScore</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ui.css') }}">
 </head>
 <body>
 <header><a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></header>
@@ -20,5 +21,6 @@
 <p>No assessments yet.</p>
 {% endif %}
 </main>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

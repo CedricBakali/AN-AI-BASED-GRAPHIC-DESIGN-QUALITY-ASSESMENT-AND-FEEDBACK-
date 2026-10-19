@@ -183,11 +183,19 @@ body {
 .nav-icon {
     width: 20px;
 
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     font-size: 16px;
 
     color: #9299a8;
+}
+
+
+.nav-icon svg {
+    width: 19px;
+    height: 19px;
 }
 
 
@@ -247,6 +255,13 @@ body {
 .tip-icon {
     font-size: 17px;
     color: #2563eb;
+    display: flex;
+    align-items: center;
+}
+
+.tip-icon svg {
+    width: 18px;
+    height: 18px;
 }
 
 
@@ -505,16 +520,7 @@ body {
 
 
 .welcome-decoration {
-    position: absolute;
-
-    right: 40px;
-    top: 15px;
-
-    font-size: 110px;
-
-    color: rgba(37, 99, 235, 0.06);
-
-    transform: rotate(15deg);
+    display: none;
 }
 
 
@@ -589,6 +595,11 @@ body {
     border-radius: 9px;
 
     font-size: 14px;
+}
+
+.stat-icon svg {
+    width: 18px;
+    height: 18px;
 }
 
 
@@ -873,7 +884,16 @@ body {
 .arrow {
     font-size: 17px;
 
+    display: inline-flex;
+    align-items: center;
+
     transition: transform 0.2s ease;
+}
+
+
+.arrow svg {
+    width: 18px;
+    height: 18px;
 }
 
 
@@ -934,7 +954,6 @@ body {
     border-radius: 13px;
 
     background: #f3f6fa;
-
     color: #a0a8b6;
 
     font-size: 20px;
@@ -1093,3 +1112,11 @@ body {
     color: #b91c1c !important;
     margin: 8px 0 0 !important;
 }
+/* =========================
+   SVG ICON SIZING (icons replaced decorative glyphs)
+   ========================= */
+
+.upload-icon svg { width: 20px; height: 20px; }
+.analyse-icon svg { width: 21px; height: 21px; }
+.empty-icon svg { width: 24px; height: 24px; }
+.notification svg { width: 17px; height: 17px; }

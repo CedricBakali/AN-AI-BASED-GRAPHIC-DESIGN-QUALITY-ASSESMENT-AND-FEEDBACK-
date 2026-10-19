@@ -6,6 +6,7 @@
 <title>Result - DesignScore</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ui.css') }}">
 </head>
 <body>
 <header class="report-top">
@@ -56,5 +57,6 @@
 <ol>{% for rec in fb.recommendations %}<li><strong>{{ rec.category }}:</strong> {{ rec.text }}</li>{% endfor %}</ol>
 </section>
 </main>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
