@@ -19,6 +19,7 @@ from app.services.feedback import build_feedback
 from app.routes.auth import auth_bp, login_required
 from app.routes.dashboard import dashboard_bp
 from app.routes.admin import admin_bp
+from app.routes.training import training_bp
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -41,6 +42,7 @@ database.init_db()
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(training_bp)
 
 
 def _allowed(filename: str) -> bool:

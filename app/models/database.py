@@ -113,6 +113,96 @@ def init_db() -> None:
         # new rows always supply it, per-user queries ignore orphans).
         _ensure_column(conn, "analyses", "user_id", "INTEGER REFERENCES users(id) ON DELETE CASCADE")
 
+        # -----------------------------
+        # DESIGN LABELS (AI training data)
+        # One row per design a human judged. These labels teach the
+        # aesthetic model in app/ai/.
+        # -----------------------------
+
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS design_labels (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                image_path  TEXT    NOT NULL UNIQUE,
+                label       TEXT    NOT NULL CHECK (label IN ('good', 'weak')),
+                score       REAL    NOT NULL,
+                features    TEXT    NOT NULL,
+                created_at  TEXT    NOT NULL
+            )
+            """
+        )
+
+
+# =========================================================
+# LABELS (AI TRAINING DATA)
+# =========================================================
+
+# A "good" design teaches the model a high target; "weak" a low one.
+LABEL_SCORES = {"good": 8.0, "weak": 3.0}
+
+
+def save_label(image_path: str, label: str, score: float,
+               features_json: str) -> None:
+    """Store (or correct) the human label for one design."""
+    if label not in LABEL_SCORES:
+        raise ValueError(f"Invalid label: {label}")
+
+    with get_connection() as conn:
+        conn.execute(
+            """
+            INSERT INTO design_labels (image_path, label, score, features, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(image_path) DO UPDATE SET
+                label      = excluded.label,
+                score      = excluded.score,
+                features   = excluded.features,
+                created_at = excluded.created_at
+            """,
+            (image_path, label, score, features_json,
+             datetime.utcnow().isoformat(timespec="seconds"))
+        )
+
+
+def get_labelled_paths() -> set[str]:
+    """Every design path that already has a label."""
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT image_path FROM design_labels"
+        ).fetchall()
+        return {row["image_path"] for row in rows}
+
+
+def get_labelled_records() -> list[dict]:
+    """All training examples, ready for the training script."""
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT * FROM design_labels ORDER BY id"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def get_label_counts() -> dict:
+    """How many good / weak designs have been labelled."""
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT label, COUNT(*) AS n FROM design_labels GROUP BY label"
+        ).fetchall()
+        counts = {"good": 0, "weak": 0}
+        for row in rows:
+            counts[row["label"]] = row["n"]
+        counts["total"] = counts["good"] + counts["weak"]
+        return counts
+
+
+def delete_label(image_path: str) -> bool:
+    """Remove a label (used to correct a wrong click)."""
+    with get_connection() as conn:
+        cursor = conn.execute(
+            "DELETE FROM design_labels WHERE image_path = ?",
+            (image_path,)
+        )
+        return cursor.rowcount > 0
+
 
 # =========================================================
 # SAVE ANALYSIS

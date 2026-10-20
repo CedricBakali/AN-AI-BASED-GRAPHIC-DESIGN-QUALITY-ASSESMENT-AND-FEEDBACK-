@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Label Training Designs - DesignScore</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/label.css') }}">
+</head>
+<body>
+<header class="admin-bar">
+<span class="badge">★ ADMIN</span>
+<nav><a href="{{ url_for('admin.dashboard') }}">Panel</a> | <a href="{{ url_for('admin.users') }}">Users</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></nav>
+</header>
+
+<main class="admin-wrap">
+<h1>Train the AI — judge these designs</h1>
+<p class="lead">Look at each design and press the button that fits. These
+examples are what the AI learns from. Use the keyboard: <kbd>G</kbd> = good,
+<kbd>W</kbd> = weak.</p>
+
+{% with messages = get_flashed_messages() %}{% if messages %}{% for message in messages %}<p class="flash"><strong>{{ message }}</strong></p>{% endfor %}{% endif %}{% endwith %}
+
+<div class="label-progress">
+    <div class="track"><div class="fill" style="width: {{ (counts.done / counts.total * 100)|round(1) if counts.total else 0 }}%"></div></div>
+    <div class="counts">
+        <span>{{ counts.done }} of {{ counts.total }} judged</span>
+        <span class="good">{{ counts.good }} good</span>
+        <span class="weak">{{ counts.weak }} weak</span>
+    </div>
+</div>
+
+{% if pending %}
+<form class="label-card" method="POST" action="{{ url_for('training.save') }}">
+    <input type="hidden" name="image_path" value="{{ pending[0] }}">
+    <img src="/{{ pending[0] }}" alt="Design to judge">
+    <p class="hint">Design {{ counts.done + 1 }} of {{ counts.total }} · {{ pending[0].split('/')[-1] }}</p>
+    <div class="label-buttons">
+        <button type="submit" name="label" value="good" class="btn-good">Good design</button>
+        <button type="submit" name="label" value="weak" class="btn-weak">Weak design</button>
+    </div>
+</form>
+<p class="queue">{{ pending|length }} design(s) still to judge.</p>
+{% else %}
+<div class="all-done">
+    <h2>All designs judged ✓</h2>
+    <p>You have {{ counts.good }} good and {{ counts.weak }} weak examples.
+    Next step: train the model.</p>
+</div>
+{% endif %}
+
+<div class="label-actions">
+    <form method="POST" action="{{ url_for('training.undo') }}">
+        <button type="submit" class="btn-plain">Undo last</button>
+    </form>
+    <form method="POST" action="{{ url_for('training.reset') }}"
+          onsubmit="return confirm('Clear every label? This cannot be undone.');">
+        <button type="submit" class="btn-plain danger">Clear all labels</button>
+    </form>
+</div>
+</main>
+
+{% if pending %}
+<script>
+(function () {
+    var form = document.querySelector(".label-card");
+    document.addEventListener("keydown", function (e) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        var k = e.key.toLowerCase();
+        if (k !== "g" && k !== "w") return;
+        var btn = form.querySelector('button[value="' + (k === "g" ? "good" : "weak") + '"]');
+        btn.click();
+    });
+})();
+</script>
+{% endif %}
+</body>
+</html>

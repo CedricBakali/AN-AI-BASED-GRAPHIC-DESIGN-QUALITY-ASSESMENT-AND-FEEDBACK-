@@ -1,0 +1,56 @@
+/* Labelling page (admin-only training data collection) */
+.lead { color: #4b5563; font-size: 14.5px; max-width: 62ch; margin-bottom: 18px; }
+kbd {
+    background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 4px;
+    padding: 1px 6px; font-size: 12px; color: #3730a3;
+}
+.flash { background: #fef9c3; border: 1px solid #eab308; padding: 10px 14px;
+    border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+
+.label-progress { margin-bottom: 20px; }
+.label-progress .track {
+    height: 10px; border-radius: 99px; background: #e5e7eb; overflow: hidden;
+}
+.label-progress .fill {
+    height: 100%; border-radius: 99px; background: linear-gradient(90deg, #2563eb, #38bdf8);
+    transition: width .2s ease;
+}
+.label-progress .counts {
+    display: flex; gap: 16px; margin-top: 8px; font-size: 13px; color: #6b7280;
+}
+.label-progress .good { color: #15803d; font-weight: 700; }
+.label-progress .weak { color: #b91c1c; font-weight: 700; }
+
+.label-card {
+    background: #fff; border-radius: 14px; padding: 22px; text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,.08);
+}
+.label-card img {
+    max-width: 100%; max-height: 460px; object-fit: contain;
+    background: #f1f5f9; border-radius: 10px;
+}
+.label-card .hint { color: #6b7280; font-size: 13px; margin: 12px 0 4px; word-break: break-all; }
+
+.label-buttons { display: flex; gap: 14px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
+.label-buttons button {
+    border: none; border-radius: 10px; padding: 16px 34px;
+    font-size: 17px; font-weight: 800; cursor: pointer; transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn-good { background: #16a34a; color: #fff; box-shadow: 0 6px 16px rgba(22,163,74,.3); }
+.btn-weak { background: #dc2626; color: #fff; box-shadow: 0 6px 16px rgba(220,38,38,.3); }
+.label-buttons button:hover { transform: translateY(-2px); }
+
+.queue { text-align: center; color: #6b7280; font-size: 13px; margin-top: 14px; }
+
+.all-done {
+    background: #fff; border-radius: 12px; padding: 30px; text-align: center;
+    border-left: 5px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.label-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+.btn-plain {
+    background: #fff; border: 1px solid #d1d5db; border-radius: 8px;
+    padding: 9px 16px; font-size: 13px; cursor: pointer; color: #374151;
+}
+.btn-plain:hover { background: #f3f4f6; }
+.btn-plain.danger { color: #b91c1c; border-color: #fecaca; }

@@ -11,7 +11,7 @@
 <body>
 <header class="admin-bar">
 <span class="badge">★ ADMIN</span>
-<nav><a href="{{ url_for('dashboard.dashboard') }}">My Dashboard</a> | <strong>Panel</strong> | <a href="{{ url_for('admin.users') }}">Users</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></nav>
+<nav><a href="{{ url_for('dashboard.dashboard') }}">My Dashboard</a> | <strong>Panel</strong> | <a href="{{ url_for('admin.users') }}">Users</a> | <a href="{{ url_for('training.index') }}">Train AI</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></nav>
 </header>
 <main class="admin-wrap">
 {% with messages = get_flashed_messages() %}{% if messages %}{% for message in messages %}<p><strong>{{ message }}</strong></p>{% endfor %}{% endif %}{% endwith %}
