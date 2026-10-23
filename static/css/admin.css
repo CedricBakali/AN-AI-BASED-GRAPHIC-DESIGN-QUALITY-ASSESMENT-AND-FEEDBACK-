@@ -74,3 +74,58 @@ body { background: #eef1f6; }
 }
 .admin-detail button:hover { background: #4338ca; }
 @media (max-width: 700px) { .stat-tiles { grid-template-columns: 1fr 1fr; } }
+
+/* ------------------------------------------------------------------ *
+   User management pages
+ * ------------------------------------------------------------------ */
+
+.admin-bar nav a,
+.admin-bar nav strong { margin-right: 20px; }
+
+.admin-wrap .lead { color: #4b5563; font-size: 14px; margin-bottom: 18px; }
+
+.crumbs { margin: 0 0 14px; font-size: 13px; }
+.crumbs a { color: #4f46e5; text-decoration: none; font-weight: 700; }
+.crumbs a:hover { text-decoration: underline; }
+
+.flash-list { list-style: none; padding: 0; margin: 0 0 16px; }
+.flash-list li {
+    background: #fef9c3; border: 1px solid #fcd34d; border-left: 4px solid #f59e0b;
+    color: #78350f; border-radius: 8px; padding: 10px 14px;
+    font-size: 14px; font-weight: 600; margin-bottom: 8px;
+}
+
+/* status / role pills */
+.pill {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 800; letter-spacing: .4px;
+    background: #eef2ff; color: #3730a3;
+}
+.pill-admin { background: #fef3c7; color: #92400e; }
+.pill-on    { background: #dcfce7; color: #166534; }
+.pill-off   { background: #fee2e2; color: #991b1b; }
+.pill.grade-a { background: #dcfce7; color: #166534; }
+.pill.grade-b { background: #dbeafe; color: #1e40af; }
+.pill.grade-c { background: #fef3c7; color: #92400e; }
+.pill.grade-d { background: #ffedd5; color: #9a3412; }
+.pill.grade-f { background: #fee2e2; color: #991b1b; }
+
+/* user detail header */
+.detail-head { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
+.detail-avatar {
+    width: 62px; height: 62px; flex: 0 0 62px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 800; color: #fff;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+.detail-head h1 { margin: 0 0 6px; font-size: 21px; }
+
+/* action buttons */
+.admin-detail button, .admin-detail form button {
+    border: none; border-radius: 8px; padding: 10px 20px;
+    font-weight: 700; cursor: pointer; font-size: 14px;
+}
+.admin-detail .btn-warn { background: #dc2626; color: #fff; }
+.admin-detail .btn-warn:hover { background: #b91c1c; }
+.admin-detail .btn-ok { background: #16a34a; color: #fff; }
+.admin-detail .btn-ok:hover { background: #15803d; }

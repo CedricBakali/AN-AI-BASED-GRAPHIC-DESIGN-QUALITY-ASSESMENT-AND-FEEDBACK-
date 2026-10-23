@@ -227,3 +227,33 @@ def set_user_active(user_id: int, active: bool) -> bool:
         )
 
         return cursor.rowcount > 0
+
+
+# =========================================================
+# UPDATE PASSWORD (OWN ACCOUNT)
+# =========================================================
+
+def update_password(user_id: int, password: str) -> bool:
+    """
+    Replace a user's password with a newly hashed one.
+
+    The plain-text password is never stored or logged.
+
+    Returns:
+        True if a row was updated, False otherwise.
+    """
+
+    password_hash = hash_password(password)
+
+    with get_connection() as conn:
+
+        cursor = conn.execute(
+            """
+            UPDATE users
+            SET password_hash = ?
+            WHERE id = ?
+            """,
+            (password_hash, user_id)
+        )
+
+        return cursor.rowcount > 0

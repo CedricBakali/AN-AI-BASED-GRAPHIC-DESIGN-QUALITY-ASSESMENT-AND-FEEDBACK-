@@ -14,6 +14,7 @@ from flask import (Flask, abort, flash, jsonify, redirect, render_template, requ
 from werkzeug.utils import secure_filename
 
 from app.models import database
+from app.models.user import get_user_by_id
 from app.services.analysis import analyze_image
 from app.services.feedback import build_feedback
 from app.routes.auth import auth_bp, login_required
@@ -114,8 +115,16 @@ def result(analysis_id: int):
 @app.route("/history")
 @login_required
 def history():
-    records = database.get_history(session["user_id"], limit=30)
-    return render_template("history/history.html", records=records)
+    user_id = session["user_id"]
+    records = database.get_history(user_id, limit=30)
+    stats = database.get_user_stats(user_id)
+    user = get_user_by_id(user_id)
+    return render_template(
+        "history/history.html",
+        records=records,
+        stats=stats,
+        user=user,
+    )
 
 
 @app.errorhandler(413)

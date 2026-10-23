@@ -9,6 +9,8 @@
     <!-- Login page CSS -->
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/ui.css') }}">
 </head>
 
 <body class="auth-page">
@@ -205,5 +207,6 @@
 })();
 </script>
 
+    <script src="{{ url_for('static', filename='js/app.js') }}></script>
 </body>
 </html>

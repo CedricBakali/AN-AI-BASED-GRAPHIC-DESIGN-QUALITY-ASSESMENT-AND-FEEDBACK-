@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Profile - DesignScore</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/ui.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages.css') }}">
+</head>
+
+<body class="dashboard-page">
+
+{% from 'partials/shell.html' import sidebar, topbar %}
+
+<div class="dashboard-layout">
+
+    {{ sidebar('profile', user) }}
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="dashboard-main">
+
+
+        {{ topbar('ACCOUNT', 'Profile', user) }}
+
+
+        <!-- ================= CONTENT ================= -->
+
+        <section class="dashboard-content">
+
+
+            <!-- FEEDBACK MESSAGES -->
+
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flash-list">
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+
+
+            <!-- WHO IS LOGGED IN -->
+
+            <div class="page-card profile-card">
+
+                <div class="profile-avatar">
+                    {{ user['username'][0]|upper }}
+                </div>
+
+                <div class="profile-identity">
+
+                    <h1>{{ user['username'] }}</h1>
+
+                    <p class="profile-email">{{ user['email'] }}</p>
+
+                    <div class="profile-tags">
+
+                        <span class="tag {{ 'tag-admin' if user['role'] == 'admin' }}">
+                            {% if user['role'] == 'admin' %}Administrator{% else %}Designer{% endif %}
+                        </span>
+
+                        <span class="tag">
+                            Member since {{ user['created_at'][:10] }}
+                        </span>
+
+                        <span class="tag {{ 'tag-off' if not user['is_active'] }}">
+                            {% if user['is_active'] %}Account active{% else %}Account disabled{% endif %}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- LIFETIME STATISTICS -->
+
+            <div class="stats-grid">
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            DESIGNS ANALYSED
+                        </span>
+
+                        <div class="stat-icon blue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                                <path d="m3 16 5-5 4 4 3-3 6 6"></path>
+                            </svg>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-number">
+                        {{ stats.total }}
+                    </div>
+
+                    <p>
+                        Uploaded to date
+                    </p>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            AVERAGE SCORE
+                        </span>
+
+                        <div class="stat-icon green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19 10 13"></path>
+                                <path d="M10 13V6"></path>
+                                <path d="M10 13h7"></path>
+                                <path d="m14 10 3 3 4-6"></path>
+                            </svg>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-number">
+                        {% if stats.average is not none %}{{ stats.average }}{% else %}&#8212;{% endif %}
+                    </div>
+
+                    <p>
+                        Overall design quality
+                    </p>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            BEST SCORE
+                        </span>
+
+                        <div class="stat-icon purple">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 21h8"></path>
+                                <path d="M12 17v4"></path>
+                                <path d="M7 4h10v5a5 5 0 0 1-10 0z"></path>
+                                <path d="M17 5h3v2a3 3 0 0 1-3 3"></path>
+                                <path d="M7 5H4v2a3 3 0 0 0 3 3"></path>
+                            </svg>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-number">
+                        {% if stats.best is not none %}{{ stats.best }}{% else %}&#8212;{% endif %}
+                    </div>
+
+                    <p>
+                        Highest quality design
+                    </p>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            LAST ACTIVITY
+                        </span>
+
+                        <div class="stat-icon orange">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9"></circle>
+                                <path d="M12 7v5l3 2"></path>
+                            </svg>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-number stat-number-sm">
+                        {% if stats.last_activity %}{{ stats.last_activity[:10] }}{% else %}&#8212;{% endif %}
+                    </div>
+
+                    <p>
+                        Most recent assessment
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- GRADE BREAKDOWN + CHANGE PASSWORD -->
+
+            <div class="page-split">
+
+
+                <!-- GRADES -->
+
+                <div class="page-card">
+
+                    <div class="card-heading">
+
+                        <h2>My Grade Breakdown</h2>
+
+                        <a href="{{ url_for('history') }}">
+                            View all
+                        </a>
+
+                    </div>
+
+                    {% if stats.grades %}
+                    <ul class="grade-list">
+                        {% for grade, n in stats.grades.items() %}
+                        <li>
+                            <span class="grade-badge grade-{{ grade[0]|lower }}">{{ grade }}</span>
+                            <span class="grade-count">{{ n }} design{{ 's' if n != 1 }}</span>
+                            <span class="grade-bar">
+                                <span class="grade-fill"
+                                      style="width: {{ (n / stats.total * 100)|round }}%"></span>
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="empty-state">
+                        <h3>No grades yet</h3>
+                        <p>Analyse a design and your grades will appear here.</p>
+                    </div>
+                    {% endif %}
+
+                </div>
+
+
+                <!-- CHANGE PASSWORD -->
+
+                <div class="page-card">
+
+                    <div class="card-heading">
+
+                        <h2>Change Password</h2>
+
+                    </div>
+
+                    <form action="{{ url_for('dashboard.change_password') }}"
+                          method="POST"
+                          class="stacked-form">
+
+                        <label class="field">
+                            <span>Current password</span>
+                            <input type="password"
+                                   name="current_password"
+                                   autocomplete="current-password"
+                                   required>
+                        </label>
+
+                        <label class="field">
+                            <span>New password</span>
+                            <input type="password"
+                                   name="new_password"
+                                   minlength="8"
+                                   autocomplete="new-password"
+                                   required>
+                            <small>At least 8 characters.</small>
+                        </label>
+
+                        <label class="field">
+                            <span>Confirm new password</span>
+                            <input type="password"
+                                   name="confirm_password"
+                                   minlength="8"
+                                   autocomplete="new-password"
+                                   required>
+                        </label>
+
+                        <button type="submit" class="form-button">
+                            Update password
+                        </button>
+
+                    </form>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- RECENT DESIGNS -->
+
+            <div class="page-card">
+
+                <div class="card-heading">
+
+                    <h2>Recent Designs</h2>
+
+                    <a href="{{ url_for('history') }}">
+                        See my designs
+                    </a>
+
+                </div>
+
+                {% if recent %}
+                <ul class="mini-list">
+                    {% for rec in recent %}
+                    <li>
+                        <a href="{{ url_for('result', analysis_id=rec['id']) }}">
+                            {{ rec['filename'] }}
+                        </a>
+                        <span class="mini-score">
+                            {{ rec['overall'] }}/100
+                            <span class="grade-badge grade-{{ rec['grade'][0]|lower }}">
+                                {{ rec['grade'] }}
+                            </span>
+                        </span>
+                        <span class="mini-date">{{ rec['created_at'][:10] }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <h3>Nothing analysed yet</h3>
+                    <p>Upload your first design from the dashboard to get started.</p>
+                    <a class="form-button" href="{{ url_for('dashboard.dashboard') }}#analyse">
+                        Analyse a design
+                    </a>
+                </div>
+                {% endif %}
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
+</html>

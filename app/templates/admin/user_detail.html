@@ -3,32 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>User Detail - DesignScore</title>
+<title>{{ user.username }} - DesignScore</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ui.css') }}">
 </head>
 <body>
 <header class="admin-bar">
-<span class="badge">★ ADMIN</span>
-<nav><a href="{{ url_for('admin.dashboard') }}">Panel</a> | <a href="{{ url_for('admin.users') }}">Users</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></nav>
+<span class="badge">&#9733; ADMIN</span>
+<nav>
+    <a href="{{ url_for('admin.dashboard') }}">Panel</a>
+    <a href="{{ url_for('admin.users') }}">Users</a>
+    <a href="{{ url_for('training.index') }}">Train AI</a>
+    <a href="{{ url_for('dashboard.dashboard') }}">My Dashboard</a>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</nav>
 </header>
+
 <main class="admin-wrap">
-{% with messages = get_flashed_messages() %}{% if messages %}{% for message in messages %}<p><strong>{{ message }}</strong></p>{% endfor %}{% endif %}{% endwith %}
-<div class="admin-detail">
-<h1>{{ user.username }} ({{ user.email }})</h1>
-<p class="meta">Role: {{ user.role }} | Active: {{ 'yes' if user.is_active else 'no' }} | Joined: {{ user.created_at }}</p>
-<form action="{{ url_for('admin.toggle_user', user_id=user.id) }}" method="POST">
-<button type="submit">{% if user.is_active %}Disable account{% else %}Enable account{% endif %}</button>
-</form>
-</div>
-<h2>Assessments ({{ assessments|length }})</h2>
-{% if assessments %}
-<ul>
-{% for a in assessments %}
-<li>#{{ a.id }} {{ a.filename }} — {{ a.overall }}/100 ({{ a.grade }}) — {{ a.created_at }}</li>
-{% endfor %}
+
+{% with messages = get_flashed_messages() %}{% if messages %}
+<ul class="flash-list">
+{% for message in messages %}<li>{{ message }}</li>{% endfor %}
 </ul>
-{% else %}<p>No assessments.</p>{% endif %}
+{% endif %}{% endwith %}
+
+<p class="crumbs"><a href="{{ url_for('admin.users') }}">&#8592; Back to users</a></p>
+
+<div class="admin-detail">
+
+    <div class="detail-head">
+
+        <div class="detail-avatar">{{ user.username[0]|upper }}</div>
+
+        <div>
+            <h1>{{ user.username }}</h1>
+            <p class="meta">
+                {{ user.email }} &middot;
+                <span class="pill {{ 'pill-admin' if user.role == 'admin' }}">{{ user.role }}</span>
+                <span class="pill {{ 'pill-on' if user.is_active else 'pill-off' }}">
+                    {{ 'active' if user.is_active else 'disabled' }}
+                </span>
+            </p>
+            <p class="meta">Joined {{ user.created_at[:10] }} &middot;
+                {{ assessments|length }} assessment{{ 's' if assessments|length != 1 }}</p>
+        </div>
+
+    </div>
+
+    <form action="{{ url_for('admin.toggle_user', user_id=user.id) }}"
+          method="POST"
+          onsubmit="return confirm('{{ 'Disable' if user.is_active else 'Enable' }} {{ user.username }}&#39;s account?');">
+        <button type="submit" class="{{ 'btn-warn' if user.is_active else 'btn-ok' }}">
+            {% if user.is_active %}Disable account{% else %}Enable account{% endif %}
+        </button>
+    </form>
+
+</div>
+
+<h2>Assessments ({{ assessments|length }})</h2>
+
+{% if assessments %}
+<table class="admin-table">
+<tr><th>ID</th><th>File</th><th>Score</th><th>Grade</th><th>Analysed</th></tr>
+{% for a in assessments %}
+<tr>
+<td>{{ a.id }}</td>
+<td>{{ a.filename }}</td>
+<td>{{ a.overall }}/100</td>
+<td><span class="pill grade-{{ a.grade[0]|lower }}">{{ a.grade }}</span></td>
+<td>{{ a.created_at[:10] }}</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<p>No assessments yet for this user.</p>
+{% endif %}
+
 </main>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

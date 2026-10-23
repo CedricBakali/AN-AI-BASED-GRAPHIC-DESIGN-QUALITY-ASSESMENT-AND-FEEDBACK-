@@ -1,0 +1,386 @@
+/* =========================================================
+   DesignScore - shared styles for the inner pages
+   (Profile, My Designs). Loaded AFTER dashboard.css so it can
+   extend the dashboard look without altering the original
+   dashboard styling itself.
+   ========================================================= */
+
+/* --- the avatar in the top bar is now a link ---------------- */
+a.user-avatar {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+
+/* --- generic content card ---------------------------------- */
+
+.flash-list {
+    list-style: none;
+    margin: 0 0 20px;
+    padding: 0;
+}
+
+.flash-list li {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-left: 4px solid #f59e0b;
+    color: #78350f;
+    border-radius: 9px;
+    padding: 11px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .05);
+}
+
+.page-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, .06);
+}
+
+.card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.card-heading h2 {
+    font-size: 17px;
+    margin: 0;
+}
+
+.card-heading a {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4f46e5;
+    text-decoration: none;
+}
+
+.card-heading a:hover { text-decoration: underline; }
+
+
+/* --- profile identity block -------------------------------- */
+
+.profile-card {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    background: linear-gradient(135deg, #eef2ff, #fff);
+    border: 1px solid #e0e7ff;
+}
+
+.profile-avatar {
+    width: 78px;
+    height: 78px;
+    flex: 0 0 78px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, .35);
+}
+
+.profile-identity h1 {
+    font-size: 22px;
+    margin: 0 0 4px;
+}
+
+.profile-email {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0 0 12px;
+}
+
+.profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    background: #eef2ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tag-admin {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fcd34d;
+}
+
+.tag-off {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+
+/* --- extra stat icon colour (dashboard.css has blue/purple/green) */
+
+.stat-icon.orange {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.stat-number-sm { font-size: 20px; padding-top: 6px; }
+
+
+/* --- two-column row (grades + password) -------------------- */
+
+.page-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+}
+
+.page-split .page-card { margin-bottom: 22px; }
+
+
+/* --- forms -------------------------------------------------- */
+
+.stacked-form { display: flex; flex-direction: column; gap: 14px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.field span {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: #475569;
+}
+
+.field input {
+    border: 1px solid #d1d5db;
+    border-radius: 9px;
+    padding: 11px 13px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #f8fafc;
+    transition: border-color .15s ease, background .15s ease;
+}
+
+.field input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, .15);
+}
+
+.field small { color: #6b7280; font-size: 12px; }
+
+.form-button {
+    display: inline-block;
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    align-self: flex-start;
+    transition: background .15s ease;
+}
+
+.form-button:hover { background: #4338ca; }
+
+
+/* --- grade breakdown list ---------------------------------- */
+
+.grade-list { list-style: none; margin: 0; padding: 0; }
+
+.grade-list li {
+    display: grid;
+    grid-template-columns: 46px 130px 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 0;
+}
+
+.grade-count { font-size: 13px; color: #475569; }
+
+.grade-bar {
+    height: 8px;
+    border-radius: 99px;
+    background: #eef2f7;
+    overflow: hidden;
+}
+
+.grade-fill {
+    display: block;
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #6366f1, #22d3ee);
+}
+
+
+/* --- grade badge (shared by Profile and My Designs) -------- */
+
+.grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    padding: 3px 9px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.grade-a { background: #dcfce7; color: #166534; }
+.grade-b { background: #dbeafe; color: #1e40af; }
+.grade-c { background: #fef3c7; color: #92400e; }
+.grade-d { background: #ffedd5; color: #9a3412; }
+.grade-f { background: #fee2e2; color: #991b1b; }
+
+
+/* --- small record lists (recent designs) ------------------- */
+
+.mini-list { list-style: none; margin: 0; padding: 0; }
+
+.mini-list li {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 4px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+}
+
+.mini-list li:last-child { border-bottom: none; }
+
+.mini-list a {
+    color: #1f2937;
+    font-weight: 600;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mini-list a:hover { color: #4f46e5; }
+
+.mini-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #475569;
+    font-size: 13px;
+}
+
+.mini-date { color: #94a3b8; font-size: 12px; }
+
+
+/* --- My Designs page --------------------------------------- */
+
+.designs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 18px;
+}
+
+.design-tile {
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, .07);
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.design-tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 26px rgba(15, 23, 42, .12);
+}
+
+.design-thumb {
+    height: 150px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.design-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.design-thumb .thumb-icon { color: #94a3b8; }
+
+.design-thumb .thumb-icon svg { width: 34px; height: 34px; }
+
+.design-body { padding: 14px 15px 16px; }
+
+.design-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.design-score {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.design-score strong { font-size: 21px; }
+
+.design-score span { color: #94a3b8; font-size: 12px; }
+
+.design-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.design-open {
+    font-weight: 700;
+    color: #4f46e5;
+}
+
+
+/* --- responsive -------------------------------------------- */
+
+@media (max-width: 1100px) {
+    .page-split { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .profile-card { flex-direction: column; text-align: center; }
+    .profile-tags { justify-content: center; }
+    .grade-list li { grid-template-columns: 46px 90px 1fr; }
+    .mini-list li { grid-template-columns: 1fr auto; }
+    .mini-date { display: none; }
+}

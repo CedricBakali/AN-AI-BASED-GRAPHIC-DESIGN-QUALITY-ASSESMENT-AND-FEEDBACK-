@@ -10,11 +10,21 @@
 </head>
 <body>
 <header class="admin-bar">
-<span class="badge">★ ADMIN</span>
-<nav><a href="{{ url_for('dashboard.dashboard') }}">My Dashboard</a> | <strong>Panel</strong> | <a href="{{ url_for('admin.users') }}">Users</a> | <a href="{{ url_for('training.index') }}">Train AI</a> | <a href="{{ url_for('auth.logout') }}">Logout</a></nav>
+<span class="badge">&#9733; ADMIN</span>
+<nav>
+    <strong>Panel</strong>
+    <a href="{{ url_for('admin.users') }}">Users</a>
+    <a href="{{ url_for('training.index') }}">Train AI</a>
+    <a href="{{ url_for('dashboard.dashboard') }}">My Dashboard</a>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</nav>
 </header>
 <main class="admin-wrap">
-{% with messages = get_flashed_messages() %}{% if messages %}{% for message in messages %}<p><strong>{{ message }}</strong></p>{% endfor %}{% endif %}{% endwith %}
+{% with messages = get_flashed_messages() %}{% if messages %}
+<ul class="flash-list">
+{% for message in messages %}<li>{{ message }}</li>{% endfor %}
+</ul>
+{% endif %}{% endwith %}
 <h1>Administration</h1>
 <div class="stat-tiles">
 <div class="stat-tile"><small>TOTAL USERS</small><div class="n">{{ stats.total_users }}</div></div>

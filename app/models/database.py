@@ -306,6 +306,53 @@ def get_history(
 
 
 # =========================================================
+# PROFILE STATISTICS FOR ONE USER
+# =========================================================
+
+def get_user_stats(user_id: int) -> dict:
+    """
+    Lifetime design statistics for a single user.
+
+    Every figure is computed from this user's own rows only.
+    """
+
+    with get_connection() as conn:
+
+        row = conn.execute(
+            """
+            SELECT COUNT(*)                    AS total,
+                   COALESCE(AVG(overall), 0)   AS average,
+                   COALESCE(MAX(overall), 0)   AS best,
+                   COALESCE(MIN(overall), 0)   AS weakest,
+                   MAX(created_at)             AS last_activity
+            FROM analyses
+            WHERE user_id = ?
+            """,
+            (user_id,)
+        ).fetchone()
+
+        grade_rows = conn.execute(
+            """
+            SELECT grade, COUNT(*) AS n
+            FROM analyses
+            WHERE user_id = ?
+            GROUP BY grade
+            ORDER BY n DESC
+            """,
+            (user_id,)
+        ).fetchall()
+
+        return {
+            "total": row["total"],
+            "average": round(row["average"]) if row["total"] else None,
+            "best": row["best"] if row["total"] else None,
+            "weakest": row["weakest"] if row["total"] else None,
+            "last_activity": row["last_activity"],
+            "grades": {r["grade"]: r["n"] for r in grade_rows},
+        }
+
+
+# =========================================================
 # GET ONE ANALYSIS
 # =========================================================
 def get_analysis(
