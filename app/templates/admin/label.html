@@ -36,6 +36,10 @@ examples are what the AI learns from. Use the keyboard: <kbd>G</kbd> = good,
         <span class="good">{{ counts.good }} good</span>
         <span class="weak">{{ counts.weak }} weak</span>
     </div>
+    {% if skipped %}
+    <p class="skipped">{{ skipped }} flat placeholder image{{ 's' if skipped != 1 }}
+       hidden &#8212; they carry no design to judge.</p>
+    {% endif %}
 </div>
 
 {% if pending %}

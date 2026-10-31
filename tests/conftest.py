@@ -22,7 +22,7 @@ def _load_app():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     module.app.config.update(TESTING=True)
-    return module.app
+    return module
 
 
 @pytest.fixture()
@@ -34,8 +34,15 @@ def tmp_db(tmp_path, monkeypatch):
 
 
 @pytest.fixture()
-def test_app(tmp_db):
-    return _load_app()
+def test_app(tmp_db, tmp_path, monkeypatch):
+    module = _load_app()
+    # Isolate uploads too: without this every pytest run writes real images
+    # into the project's static/uploads folder, where they later appear as
+    # bogus examples on the Train AI labelling page.
+    uploads = tmp_path / "uploads"
+    uploads.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr(module, "UPLOAD_DIR", str(uploads))
+    return module.app
 
 
 @pytest.fixture()

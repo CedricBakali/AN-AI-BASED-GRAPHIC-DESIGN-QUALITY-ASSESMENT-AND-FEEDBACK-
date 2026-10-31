@@ -42,6 +42,12 @@ kbd {
 
 .queue { text-align: center; color: #6b7280; font-size: 13px; margin-top: 14px; }
 
+.label-progress .skipped {
+    margin: 8px 0 0; font-size: 12px; color: #92400e;
+    background: #fef3c7; border: 1px dashed #fcd34d;
+    border-radius: 7px; padding: 6px 10px; display: inline-block;
+}
+
 .all-done {
     background: #fff; border-radius: 12px; padding: 30px; text-align: center;
     border-left: 5px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,.06);

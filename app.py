@@ -17,6 +17,7 @@ from app.models import database
 from app.models.user import get_user_by_id
 from app.services.analysis import analyze_image
 from app.services.feedback import build_feedback
+from app.ai import aesthetic_analyzer
 from app.routes.auth import auth_bp, login_required
 from app.routes.dashboard import dashboard_bp
 from app.routes.admin import admin_bp
@@ -93,7 +94,21 @@ def analyze():
     except Exception as exc:  # noqa: BLE001 - surface a friendly message
         return fail(f"Could not analyze that image: {exc}")
 
-    analysis_id = database.save_analysis(session["user_id"], safe, rel_path, result)
+    # Trained-model estimate. Strictly optional: a missing or broken model
+    # must never stop the rule-based report from being produced.
+    ai_score, ai_factors = None, None
+    try:
+        ai = aesthetic_analyzer.analyze_aesthetics(abs_path)
+    except Exception:  # noqa: BLE001 - degrade to rule-based only
+        ai = None
+    if ai:
+        ai_score = ai["score"]
+        ai_factors = ai["factors"]
+
+    analysis_id = database.save_analysis(
+        session["user_id"], safe, rel_path, result,
+        ai_score=ai_score, ai_factors=ai_factors,
+    )
     if wants_json:
         return jsonify({
             "ok": True,

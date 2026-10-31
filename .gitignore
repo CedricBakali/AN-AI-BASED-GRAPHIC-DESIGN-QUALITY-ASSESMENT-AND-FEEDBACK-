@@ -4,6 +4,9 @@ __pycache__/
 instance/
 *.db
 *.sqlite3
+# Trained model artefacts - regenerate with scripts/train_model.py
+app/ai/*.pkl
+app/ai/aesthetic_model_metrics.json
 static/uploads/*
 !static/uploads/.gitkeep
 .env

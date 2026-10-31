@@ -13,6 +13,7 @@ import os
 
 from flask import (Blueprint, abort, flash, redirect, render_template,
                    request, url_for)
+from PIL import Image
 
 from app.models import database
 from app.models.database import LABEL_SCORES
@@ -27,16 +28,46 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 UPLOADS = os.path.join(PROJECT_ROOT, "static", "uploads")
 
 
-def _listed_designs() -> list[str]:
-    """Relative paths of every stored design, sorted for a stable order."""
+def _is_labelable(path: str) -> bool:
+    """
+    Reject images that carry no design information.
+
+    Automated tests leave solid single-colour squares in the uploads
+    folder. Scoring one would produce meaningless features and, worse,
+    they would quietly poison the training set, so they are filtered out
+    here rather than shown to the reviewer. Real designs always contain
+    many colours.
+    """
+    try:
+        if os.path.getsize(path) > 5 * 1024:      # a real design is bigger
+            return True
+        with Image.open(path) as im:
+            colours = im.convert("RGB").getcolors(maxcolors=4)
+        return colours is None or len(colours) > 3
+    except Exception:                              # unreadable: cannot judge it
+        return False
+
+
+def _listed_designs() -> tuple:
+    """
+    Stored designs that are worth judging.
+
+    Returns:
+        (relative paths sorted for a stable order, number filtered out)
+    """
     if not os.path.isdir(UPLOADS):
-        return []
+        return [], 0
     allowed = {"png", "jpg", "jpeg", "webp", "bmp", "gif"}
     out = []
+    skipped = 0
     for name in sorted(os.listdir(UPLOADS)):
-        if name.rsplit(".", 1)[-1].lower() in allowed:
+        if name.rsplit(".", 1)[-1].lower() not in allowed:
+            continue
+        if _is_labelable(os.path.join(UPLOADS, name)):
             out.append(f"static/uploads/{name}")
-    return out
+        else:
+            skipped += 1
+    return out, skipped
 
 
 def _counts(done: int, total: int) -> dict:
@@ -47,11 +78,12 @@ def _counts(done: int, total: int) -> dict:
 @login_required
 @admin_required
 def index():
-    designs = _listed_designs()
+    designs, skipped = _listed_designs()
     labelled = database.get_labelled_paths()
     pending = [p for p in designs if p not in labelled]
     counts = _counts(len(labelled & set(designs)), len(designs))
-    return render_template("admin/label.html", pending=pending, counts=counts)
+    return render_template("admin/label.html", pending=pending,
+                           counts=counts, skipped=skipped)
 
 
 @training_bp.route("/save", methods=["POST"])

@@ -56,6 +56,26 @@
 .panel.strengths { border-left: 5px solid #16a34a; }
 .panel.weaknesses { border-left: 5px solid #dc2626; }
 .panel.reco { border-left: 5px solid #2563eb; }
+
+/* Trained-model estimate */
+.panel.ai-panel { border-left: 5px solid #7c3aed; background: #faf8ff; }
+.panel.ai-panel h2 { display: flex; align-items: center; justify-content: space-between; }
+.panel.ai-panel h2 .v { font-size: 20px; color: #6d28d9; font-weight: 800; }
+.panel.ai-agree { color: #166534; background: #dcfce7; border-radius: 8px;
+    padding: 9px 12px; font-size: 14px; margin-bottom: 12px; }
+.panel.ai-differ { color: #92400e; background: #fef3c7; border-radius: 8px;
+    padding: 9px 12px; font-size: 14px; margin-bottom: 12px; }
+.panel.ai-panel h3 { font-size: 14px; margin: 14px 0 8px; }
+.panel .ai-factors { list-style: none; margin-left: 0; }
+.panel .ai-factors li {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 7px 0; border-bottom: 1px solid #ede9fe; font-size: 14px;
+}
+.panel .ai-factors li:last-child { border-bottom: none; }
+.panel .ai-val { color: #7c3aed; font-weight: 700; }
+.panel .ai-note { color: #6b7280; font-size: 12.5px; margin-top: 14px;
+    line-height: 1.55; }
+.panel.ai-empty { border-left: 5px solid #cbd5e1; background: #f8fafc; }
 .panel ul, .panel ol { margin-left: 20px; font-size: 14px; }
 .panel li { margin-bottom: 6px; }
 .panel .muted { color: #6b7280; font-size: 14px; }

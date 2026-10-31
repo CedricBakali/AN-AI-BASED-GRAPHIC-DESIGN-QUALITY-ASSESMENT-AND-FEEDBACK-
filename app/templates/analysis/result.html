@@ -27,6 +27,44 @@
 </div>
 </section>
 
+{% if r.ai_score is not none %}
+<section class="panel ai-panel">
+  <h2>AI estimate <span class="v">{{ r.ai_score }}/100</span></h2>
+
+  {% set gap = (r.ai_score - r.overall)|abs %}
+  {% if gap <= 10 %}
+  <p class="ai-agree">The trained model agrees with the rule-based
+     assessment (difference of {{ gap }} point{{ 's' if gap != 1 }}).</p>
+  {% else %}
+  <p class="ai-differ">The trained model scores this
+     {{ 'higher' if r.ai_score > r.overall else 'lower' }} than the
+     rule-based rules do ({{ r.ai_score }} vs {{ r.overall }}). Both views
+     are shown so you can judge for yourself.</p>
+  {% endif %}
+
+  {% if r.ai_factors %}
+  <h3>What the model weighed most</h3>
+  <ul class="ai-factors">
+    {% for f in r.ai_factors %}
+    <li><strong>{{ f.name }}:</strong> {{ f.reading }}
+        <span class="ai-val">{{ (f.value * 100)|round|int }}%</span></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <p class="ai-note">This figure comes from a small model trained on designs
+     judged by a human reviewer. It is a second opinion that complements the
+     rule-based scores above &#8212; it does not replace them.</p>
+</section>
+{% else %}
+<section class="panel ai-panel ai-empty">
+  <h2>AI estimate</h2>
+  <p class="muted">Not available for this report &#8212; no model had been
+     trained when this design was analysed. Once a model exists, new
+     assessments will include an AI estimate alongside the rule-based scores.</p>
+</section>
+{% endif %}
+
 <h2>Category scores</h2>
 <div class="cards">
 {% for cat in r.categories %}
