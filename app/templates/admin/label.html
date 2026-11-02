@@ -15,17 +15,25 @@
 <nav>
     <a href="{{ url_for('admin.dashboard') }}">Panel</a>
     <a href="{{ url_for('admin.users') }}">Users</a>
-    <strong>Train AI</strong>
+    <strong>Label Designs (Experimental)</strong>
     <a href="{{ url_for('dashboard.dashboard') }}">My Dashboard</a>
     <a href="{{ url_for('auth.logout') }}">Logout</a>
 </nav>
 </header>
 
 <main class="admin-wrap">
-<h1>Train the AI — judge these designs</h1>
-<p class="lead">Look at each design and press the button that fits. These
-examples are what the AI learns from. Use the keyboard: <kbd>G</kbd> = good,
-<kbd>W</kbd> = weak.</p>
+<h1>Label Designs (Experimental)</h1>
+<p class="lead">Look at each design and press the button that fits. Use the
+keyboard: <kbd>G</kbd> = good, <kbd>W</kbd> = weak.</p>
+
+<p class="flash" style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px 12px;">
+<strong>Experimental tool.</strong> This page collects an administrator's own
+judgements so they can be studied offline with
+<code>scripts/train_model.py</code>. It is <strong>not</strong> the AI system
+used for reports: every report's AI-Assisted Assessment comes from the
+<strong>pre-trained CLIP model</strong>, and every design-principle score
+comes from <strong>rule-based computer-vision analysis</strong>. Nothing
+here changes what users see on their reports.</p>
 
 {% with messages = get_flashed_messages() %}{% if messages %}{% for message in messages %}<p class="flash"><strong>{{ message }}</strong></p>{% endfor %}{% endif %}{% endwith %}
 
@@ -57,7 +65,8 @@ examples are what the AI learns from. Use the keyboard: <kbd>G</kbd> = good,
 <div class="all-done">
     <h2>All designs judged ✓</h2>
     <p>You have {{ counts.good }} good and {{ counts.weak }} weak examples.
-    Next step: train the model.</p>
+    They can be studied offline with
+    <code>scripts/train_model.py</code> (experimental).</p>
 </div>
 {% endif %}
 

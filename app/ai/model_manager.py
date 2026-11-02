@@ -1,15 +1,21 @@
-"""Model management (AI Phase 11, step 3).
+"""EXPERIMENTAL / LEGACY - scikit-learn labelling experiment.
 
-Owns the trained aesthetic model: training, persistence and prediction.
+.. warning::
+   This module is **not** part of the ``/analyze`` runtime pipeline and is
+   not the project's AI methodology. It is kept for an offline experiment
+   only: an administrator judges designs on the *Label Designs
+   (Experimental)* page, and ``scripts/train_model.py`` may fit a small
+   Random Forest to those judgements for study. Nothing here produces the
+   AI-Assisted Assessment shown on reports - that comes from the
+   **pre-trained CLIP model** in :mod:`app.ai.clip_analyzer`.
 
 Honest scope
 ------------
 This is a small, genuinely trained scikit-learn model. It learns the
 relationship between 12 measurable visual features and a quality score
-that a human assigned on the Train AI page. It is NOT a large pre-trained
-neural network, and it does not "understand" design the way a person
-does. It complements the deterministic rule-based scores in
-app/services/analysis.py — it never replaces them.
+that a human assigned. It is NOT a large pre-trained neural network, and it
+does not "understand" design the way a person does. It was superseded by
+the zero-shot CLIP approach, which needs no labelled data at all.
 """
 from __future__ import annotations
 

@@ -6,11 +6,18 @@ app/models/designscore.db is never touched.
 from __future__ import annotations
 
 import importlib.util
+import os
 import pathlib
 
 import pytest
 
 from app.models import database
+
+# The web app starts a background warm-up of the pre-trained CLIP model.
+# Tests must NOT do that: it costs ~30 s and ~1 GB per run, and several
+# tests deliberately simulate the AI being unavailable. Set before app.py
+# is ever imported (see _load_app below).
+os.environ["DESIGNSCORE_CLIP_WARMUP"] = "0"
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 

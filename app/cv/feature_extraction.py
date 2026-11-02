@@ -5,7 +5,9 @@ vector"). Every feature has a plain-English name, a bounded 0-1 range, and a
 clear meaning — so a prediction can always be explained back to the student.
 
 These are measurable visual facts (brightness, contrast, edge density,
-balance, symmetry...). They are the INPUTS to the trained model, not scores.
+balance, symmetry...). They are consumed by the experimental scikit-learn
+labelling experiment (app/ai/model_manager.py) and are not, by themselves,
+the report's scores.
 """
 from __future__ import annotations
 

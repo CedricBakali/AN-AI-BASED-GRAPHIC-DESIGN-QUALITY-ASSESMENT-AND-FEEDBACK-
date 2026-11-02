@@ -1,9 +1,12 @@
-"""Aesthetic analyzer (AI Phase 11, step 3).
+"""EXPERIMENTAL / LEGACY - scikit-learn labelling experiment.
 
-Runtime wrapper: turns an uploaded design into a trained-model estimate
-that is shown alongside (not instead of) the rule-based report.
+.. warning::
+   **This module is no longer called by the ``/analyze`` runtime
+   pipeline.** It is kept so the earlier experiment remains reproducible.
+   The AI-Assisted Assessment on reports now comes from the pre-trained
+   CLIP model in :mod:`app.ai.clip_analyzer`.
 
-Pipeline position:
+Legacy pipeline position:
     IMAGE -> PRE-PROCESSING -> CV FEATURES -> TRAINED MODEL -> AI SCORE
 """
 from __future__ import annotations

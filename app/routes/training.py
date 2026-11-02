@@ -1,7 +1,14 @@
-"""Training data collection (AI Phase 11, step 2).
+"""EXPERIMENTAL - design labelling (admin only).
 
 Admin-only pages that let a human judge designs as "good" or "weak".
-Those judgements are the training examples the aesthetic model learns from.
+
+.. warning::
+   This is **not** the AI system used for reports. It only collects an
+   administrator's judgements so they can be studied offline with
+   ``scripts/train_model.py``. The AI-Assisted Assessment on reports comes
+   from the pre-trained CLIP model (:mod:`app.ai.clip_analyzer`), and the
+   design-principle scores come from rule-based computer-vision analysis
+   (:mod:`app.services.analysis`).
 
 Pipeline position:
     IMAGE -> PRE-PROCESSING -> CV FEATURES -> (labelled by a human here)

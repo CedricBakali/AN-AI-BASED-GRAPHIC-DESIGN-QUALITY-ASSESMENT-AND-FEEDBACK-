@@ -4,3 +4,21 @@ opencv-python-headless==5.0.0.93
 Pillow==12.1.1
 numpy==2.4.3
 pytest==8.3.4
+
+# ------------------------------------------------------------------
+# AI layer: pre-trained CLIP used for ZERO-SHOT inference only.
+# No neural network is trained locally. Weights are downloaded once
+# and cached under app/ai/weights/ (gitignored).
+# ------------------------------------------------------------------
+torch==2.15.0
+torchvision==0.29.1
+transformers==4.57.6
+
+# ------------------------------------------------------------------
+# EXPERIMENTAL / LEGACY - the scikit-learn labelling experiment
+# (app/ai/model_manager.py, scripts/train_model.py). Still imported,
+# so it stays declared, but it is NOT part of the /analyze runtime
+# pipeline and is not the project's AI methodology.
+# ------------------------------------------------------------------
+scikit-learn==1.9.0
+joblib==1.5.3

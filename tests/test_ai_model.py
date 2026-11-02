@@ -1,7 +1,13 @@
-"""Tests for the trained aesthetic model (AI Phase 11, step 3).
+"""Tests for the EXPERIMENTAL scikit-learn labelling experiment.
 
-These run against a temporary model file, so they never overwrite a model
-you trained for real, and against a temporary database.
+The model file and database are temporary, so these never overwrite a model
+you trained for real.
+
+.. note::
+   The scikit-learn model is legacy/experimental - it is NOT the runtime AI.
+   The runtime AI is the pre-trained CLIP model, tested in
+   tests/test_clip_analyzer.py. The last section of this file tests the
+   report WIRING with the CLIP call stubbed out (fast, deterministic).
 """
 from __future__ import annotations
 
@@ -194,7 +200,7 @@ def test_analyzer_scores_a_real_design(isolated_model):
 
 
 # ---------------------------------------------------------------
-# surfaced on the assessment report
+# EXPERIMENTAL scikit-learn model info
 # ---------------------------------------------------------------
 
 def test_model_info_reports_honestly(isolated_model):
@@ -209,82 +215,159 @@ def test_model_info_reports_honestly(isolated_model):
 
 # ---------------------------------------------------------------
 # end to end: upload -> stored -> shown on the report
+#
+# The runtime AI is the pre-trained CLIP model. Loading the real 605 MB
+# model inside every test would cost ~30 s and ~1 GB, so these wiring tests
+# stub analyze_with_ai and assert what the app DOES with its answer.
+# Genuine inference is covered separately in tests/test_clip_analyzer.py.
 # ---------------------------------------------------------------
 
-def _train_and_save(isolated_model):
-    rows, targets = _fake_rows(20)
-    model, info = train_model(rows, targets)
-    model_manager.save_model(model, info)
-    return info
-
-
-def test_report_shows_ai_panel_when_model_exists(client, logged_client,
-                                                 isolated_model):
+def _png_upload(logged_client, name="design.png", colour=(200, 60, 60)):
     import io
 
     from PIL import Image
 
-    _train_and_save(isolated_model)
-
     buf = io.BytesIO()
-    Image.new("RGB", (300, 220), (200, 60, 60)).save(buf, format="PNG")
+    Image.new("RGB", (300, 220), colour).save(buf, format="PNG")
     buf.seek(0)
+    return logged_client.post("/analyze", data={"image": (buf, name)},
+                              content_type="multipart/form-data",
+                              follow_redirects=False)
 
-    rv = logged_client.post("/analyze", data={"image": (buf, "design.png")},
-                            content_type="multipart/form-data",
-                            follow_redirects=False)
+
+def _fake_ai(score=73, available=True, factors=None):
+    """A stand-in for clip_analyzer.analyze_with_ai's return value."""
+    return {
+        "score": score,
+        "model": "openai/clip-vit-base-patch32",
+        "label": "CLIP (OpenAI CLIP)",
+        "available": available,
+        "explanation": "stub explanation",
+        "impressions": (factors if factors is not None else [
+            {"label": "Attractiveness", "positive_probability": 0.62},
+            {"label": "Professionalism", "positive_probability": 0.41},
+            {"label": "Attention-grabbing", "positive_probability": 0.55},
+        ]),
+        "confidence": 0.73,
+        "positive_probability": score / 100.0,
+    }
+
+
+def test_report_shows_ai_panel_when_clip_available(client, logged_client,
+                                                   monkeypatch):
+    from app.ai import clip_analyzer
+    monkeypatch.setattr(clip_analyzer, "analyze_with_ai",
+                        lambda _path: _fake_ai(score=73))
+
+    rv = _png_upload(logged_client)
     assert rv.status_code == 302
-    assert rv.location.startswith("/result/")
 
     html = logged_client.get(rv.location).data.decode()
-    assert "AI estimate" in html
+    assert "AI-Assisted Assessment" in html
     assert "ai-panel" in html
-    assert "second opinion" in html
+    assert "73/100" in html
+    # Model identity is shown honestly.
+    assert "openai/clip-vit-base-patch32" in html
+    assert "CLIP (OpenAI CLIP)" in html
+    assert "Available" in html
+    # Scope: the AI is general, the principles are CV.
+    assert "general" in html
+    assert "separately through computer-vision analysis" in html
+    # Regression: HTML entities must never leak as literal text. The
+    # explanation is built in Python and then escaped by Jinja, so it has
+    # to use real Unicode characters, not &mdash; / &rsquo;.
+    assert "&mdash;" not in html
+    assert "&rsquo;" not in html
+    assert "&amp;mdash;" not in html
+    # Regression: the comparison sentence needs its "than".
+    assert "points higher the " not in html
+    assert "points lower the " not in html
 
 
-def test_report_explains_absent_model(client, logged_client, isolated_model):
-    """No model trained yet: the report still renders, and says so."""
-    import io
+def test_ai_score_and_model_are_stored(client, logged_client, monkeypatch):
+    from app.ai import clip_analyzer
+    monkeypatch.setattr(clip_analyzer, "analyze_with_ai",
+                        lambda _path: _fake_ai(score=61))
 
-    from PIL import Image
+    rv = _png_upload(logged_client, "stored.png")
+    analysis_id = int(rv.location.rsplit("/", 1)[1])
 
-    buf = io.BytesIO()
-    Image.new("RGB", (300, 220), (60, 120, 200)).save(buf, format="PNG")
-    buf.seek(0)
+    from app.models import database
+    record = database.get_analysis(analysis_id, session_user_id())
+    assert record["ai_score"] == 61
+    assert record["ai_model"] == "openai/clip-vit-base-patch32"
+    assert isinstance(record["ai_factors"], list)
+    assert record["ai_factors"][0]["name"] == "Overall design quality"
 
-    rv = logged_client.post("/analyze", data={"image": (buf, "plain.png")},
-                            content_type="multipart/form-data",
-                            follow_redirects=False)
+
+def test_report_shows_unavailable_when_clip_is_not(client, logged_client,
+                                                   monkeypatch):
+    """CLIP unavailable -> ai_score stays NULL and the report says so."""
+    from app.ai import clip_analyzer
+    monkeypatch.setattr(clip_analyzer, "analyze_with_ai",
+                        lambda _path: _fake_ai(score=None, available=False))
+
+    rv = _png_upload(logged_client, "unavailable.png", (60, 120, 200))
     assert rv.status_code == 302
 
+    analysis_id = int(rv.location.rsplit("/", 1)[1])
+    from app.models import database
+    record = database.get_analysis(analysis_id, session_user_id())
+    assert record["ai_score"] is None
+    assert record["ai_model"] is None
+
     html = logged_client.get(rv.location).data.decode()
-    assert "AI estimate" in html
-    assert "no model had been" in html
+    assert "AI-Assisted Assessment" in html
+    assert "Unavailable" in html
+    # The rule-based report must still be complete.
+    assert "Category scores" in html
 
 
-def test_upload_survives_a_broken_model(client, logged_client, isolated_model,
-                                        monkeypatch):
-    """A model that raises must never stop the rule-based report."""
-    import io
-
-    from PIL import Image
-
-    _train_and_save(isolated_model)
+def test_upload_survives_a_broken_clip(client, logged_client, monkeypatch):
+    """An AI that raises must never stop the rule-based report."""
+    from app.ai import clip_analyzer
 
     def boom(_path):
         raise RuntimeError("model exploded")
 
-    monkeypatch.setattr("app.ai.aesthetic_analyzer.analyze_aesthetics", boom)
+    monkeypatch.setattr(clip_analyzer, "analyze_with_ai", boom)
 
-    buf = io.BytesIO()
-    Image.new("RGB", (300, 220), (90, 90, 90)).save(buf, format="PNG")
-    buf.seek(0)
-
-    rv = logged_client.post("/analyze", data={"image": (buf, "safe.png")},
-                            content_type="multipart/form-data",
-                            follow_redirects=False)
+    rv = _png_upload(logged_client, "safe.png", (90, 90, 90))
     assert rv.status_code == 302
     assert rv.location.startswith("/result/")
 
     html = logged_client.get(rv.location).data.decode()
     assert "Category scores" in html
+    assert "Unavailable" in html
+
+
+def test_rule_based_score_is_unchanged_by_the_ai(client, logged_client,
+                                                 monkeypatch):
+    """overall must equal the mean of the category scores, always."""
+    from app.ai import clip_analyzer
+
+    for score in (5, 50, 95):
+        monkeypatch.setattr(clip_analyzer, "analyze_with_ai",
+                            lambda _path, s=score: _fake_ai(score=s))
+        rv = _png_upload(logged_client, "unchanged.png", (30, 30 + score, 60))
+        assert rv.status_code == 302
+
+        from app.models import database
+        record = database.get_analysis(int(rv.location.rsplit("/", 1)[1]),
+                                       session_user_id())
+        cats = record["categories"]
+        mean = round(sum(c["score"] for c in cats) / len(cats))
+        assert record["overall"] == mean, "AI must not touch overall"
+        assert record["ai_score"] == score
+
+
+def session_user_id() -> int:
+    """The id the test suite's registered user receives in a fresh temp DB."""
+    from app.models import database
+    with database.get_connection() as conn:
+        row = conn.execute(
+            "SELECT id FROM users WHERE email = ?",
+            ("tester@test.com",)
+        ).fetchone()
+    assert row is not None, "logged_client must have registered first"
+    return int(row["id"])

@@ -57,15 +57,32 @@
 .panel.weaknesses { border-left: 5px solid #dc2626; }
 .panel.reco { border-left: 5px solid #2563eb; }
 
-/* Trained-model estimate */
+/* AI-assisted assessment (pre-trained CLIP, zero-shot inference) */
 .panel.ai-panel { border-left: 5px solid #7c3aed; background: #faf8ff; }
 .panel.ai-panel h2 { display: flex; align-items: center; justify-content: space-between; }
 .panel.ai-panel h2 .v { font-size: 20px; color: #6d28d9; font-weight: 800; }
-.panel.ai-agree { color: #166534; background: #dcfce7; border-radius: 8px;
-    padding: 9px 12px; font-size: 14px; margin-bottom: 12px; }
-.panel.ai-differ { color: #92400e; background: #fef3c7; border-radius: 8px;
-    padding: 9px 12px; font-size: 14px; margin-bottom: 12px; }
-.panel.ai-panel h3 { font-size: 14px; margin: 14px 0 8px; }
+
+/* Model / status key-value block */
+.panel .ai-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 8px 18px; margin: 14px 0 16px; }
+.panel .ai-meta > div { display: flex; flex-direction: column; gap: 2px; }
+.panel .ai-meta dt { font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+    color: #6b7280; font-weight: 700; }
+.panel .ai-meta dd { margin: 0; font-size: 14px; color: #1f2937; font-weight: 600; }
+.panel .ai-meta dd.mono { font-family: ui-monospace, Consolas, monospace;
+    font-size: 12.5px; font-weight: 500; color: #4b5563; }
+.panel .ai-meta dd.ai-ok { color: #166534; }
+.panel .ai-meta dd.ai-off { color: #92400e; }
+
+/* Scope statement - the honest boundary between AI and CV */
+.panel .ai-scope { color: #374151; background: #ede9fe; border-radius: 8px;
+    padding: 10px 12px; font-size: 13.5px; line-height: 1.55; margin-bottom: 12px; }
+
+.panel.ai-agree { color: #1f2937; background: #f3f0ff; border-radius: 8px;
+    padding: 9px 12px; font-size: 13.5px; margin-top: 14px; line-height: 1.55; }
+.panel.ai-panel h3 { font-size: 14px; margin: 14px 0 4px; }
+.panel .ai-subnote { color: #6b7280; font-size: 12px; line-height: 1.5;
+    margin-bottom: 8px; }
 .panel .ai-factors { list-style: none; margin-left: 0; }
 .panel .ai-factors li {
     display: flex; justify-content: space-between; gap: 12px;
@@ -73,12 +90,12 @@
 }
 .panel .ai-factors li:last-child { border-bottom: none; }
 .panel .ai-val { color: #7c3aed; font-weight: 700; }
-.panel .ai-note { color: #6b7280; font-size: 12.5px; margin-top: 14px;
+.panel .ai-note { color: #6b7280; font-size: 12.5px; margin-top: 12px;
     line-height: 1.55; }
 .panel.ai-empty { border-left: 5px solid #cbd5e1; background: #f8fafc; }
 .panel ul, .panel ol { margin-left: 20px; font-size: 14px; }
 .panel li { margin-bottom: 6px; }
-.panel .muted { color: #6b7280; font-size: 14px; }
+.panel .muted { color: #6b7280; font-size: 14px; line-height: 1.55; }
 
 @media (max-width: 720px) {
     .hero { grid-template-columns: 1fr; }

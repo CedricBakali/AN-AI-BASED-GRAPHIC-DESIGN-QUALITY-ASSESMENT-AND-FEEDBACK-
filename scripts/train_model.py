@@ -1,8 +1,15 @@
-"""Train the DesignScore aesthetic model.
+"""EXPERIMENTAL / LEGACY - fit the scikit-learn labelling experiment.
 
-Reads the designs an admin judged on the Train AI page, learns the link
-between their 12 visual features and the quality score, then writes the
-model to app/ai/aesthetic_model.pkl.
+Reads the designs an administrator judged on the *Label Designs
+(Experimental)* page, learns the link between their 12 visual features and
+the quality score, then writes the model to app/ai/aesthetic_model.pkl.
+
+.. warning::
+   This script is **not** used by the running application. ``/analyze`` does
+   not call this model. The AI-Assisted Assessment on reports comes from the
+   pre-trained CLIP model (:mod:`app.ai.clip_analyzer`), and the
+   design-principle scores come from rule-based computer-vision analysis.
+   This script exists so the earlier experiment stays reproducible.
 
 Usage:
     python scripts/train_model.py              # train on human labels only

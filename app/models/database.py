@@ -113,11 +113,12 @@ def init_db() -> None:
         # new rows always supply it, per-user queries ignore orphans).
         _ensure_column(conn, "analyses", "user_id", "INTEGER REFERENCES users(id) ON DELETE CASCADE")
 
-        # Trained-model estimate, captured at the moment of analysis so a
-        # later retraining cannot silently rewrite old reports. NULL when
-        # no model had been trained yet.
+        # AI (pre-trained CLIP) estimate, captured at the moment of analysis
+        # so a later model change cannot silently rewrite old reports.
+        # NULL when the AI component was unavailable for that analysis.
         _ensure_column(conn, "analyses", "ai_score", "INTEGER")
         _ensure_column(conn, "analyses", "ai_factors", "TEXT")
+        _ensure_column(conn, "analyses", "ai_model", "TEXT")
 
         # -----------------------------
         # DESIGN LABELS (AI training data)
@@ -220,16 +221,18 @@ def save_analysis(
     image_path: str,
     result,
     ai_score: int | None = None,
-    ai_factors: list | None = None
+    ai_factors: list | None = None,
+    ai_model: str | None = None
 ) -> int:
     """
     Save an analysis belonging to a specific user.
 
     Args:
-        ai_score: the trained model's estimate (0-100), or None when no
-            model had been trained at the time of the analysis.
-        ai_factors: the features that moved that estimate most, kept so
-            the report stays explainable even after a later retrain.
+        ai_score: the pre-trained CLIP model's zero-shot estimate (0-100),
+            or None when the AI component was unavailable at analysis time.
+        ai_factors: the AI's supporting readings, kept so the report stays
+            explainable even after the model is later changed.
+        ai_model: identifier of the AI model that produced ai_score.
 
     Returns:
         int: ID of the newly created analysis.
@@ -251,9 +254,10 @@ def save_analysis(
                 categories,
                 ai_score,
                 ai_factors,
+                ai_model,
                 created_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 user_id,
@@ -265,6 +269,7 @@ def save_analysis(
                 json.dumps(data["categories"]),
                 ai_score,
                 json.dumps(ai_factors) if ai_factors else None,
+                ai_model,
                 datetime.utcnow().isoformat(timespec="seconds")
             )
         )
@@ -290,6 +295,7 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
         "ai_score": row["ai_score"],
         "ai_factors": (json.loads(row["ai_factors"])
                        if row["ai_factors"] else None),
+        "ai_model": row["ai_model"],
         "created_at": row["created_at"]
     }
 

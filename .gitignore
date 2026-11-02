@@ -4,9 +4,12 @@ __pycache__/
 instance/
 *.db
 *.sqlite3
-# Trained model artefacts - regenerate with scripts/train_model.py
+# EXPERIMENTAL scikit-learn artefacts - regenerate with scripts/train_model.py
 app/ai/*.pkl
 app/ai/aesthetic_model_metrics.json
+# Pre-trained CLIP weights (605 MB) downloaded by app/ai/model_loader.py.
+# Never committed - re-download once on any machine.
+app/ai/weights/
 static/uploads/*
 !static/uploads/.gitkeep
 .env

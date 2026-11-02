@@ -27,41 +27,68 @@
 </div>
 </section>
 
-{% if r.ai_score is not none %}
+{% if ai.available %}
 <section class="panel ai-panel">
-  <h2>AI estimate <span class="v">{{ r.ai_score }}/100</span></h2>
+  <h2>AI-Assisted Assessment <span class="v">{{ ai.score }}/100</span></h2>
 
-  {% set gap = (r.ai_score - r.overall)|abs %}
-  {% if gap <= 10 %}
-  <p class="ai-agree">The trained model agrees with the rule-based
-     assessment (difference of {{ gap }} point{{ 's' if gap != 1 }}).</p>
-  {% else %}
-  <p class="ai-differ">The trained model scores this
-     {{ 'higher' if r.ai_score > r.overall else 'lower' }} than the
-     rule-based rules do ({{ r.ai_score }} vs {{ r.overall }}). Both views
-     are shown so you can judge for yourself.</p>
-  {% endif %}
+  <dl class="ai-meta">
+    <div><dt>Model</dt><dd>{{ ai.label }}</dd></div>
+    <div><dt>Model identifier</dt><dd class="mono">{{ ai.model }}</dd></div>
+    <div><dt>Method</dt><dd>Zero-shot AI assessment (pre-trained model, inference only)</dd></div>
+    <div><dt>Status</dt><dd class="ai-ok">{{ ai.status }}</dd></div>
+    <div><dt>AI aesthetic score</dt><dd>{{ ai.score }}/100</dd></div>
+  </dl>
 
-  {% if r.ai_factors %}
-  <h3>What the model weighed most</h3>
+  <p class="ai-scope"><strong>The AI score provides a general
+     visual/aesthetic assessment. The design-principle scores are produced
+     separately through computer-vision analysis.</strong> The pre-trained
+     model does not measure typography, alignment, white space, or any other
+     individual design principle &#8212; those measurements come from the
+     deterministic analysis shown in the category scores below.</p>
+
+  <p class="ai-note">{{ ai.explanation }}</p>
+
+  {% if ai.factors %}
+  <h3>General impressions from the AI model</h3>
+  <p class="ai-subnote">These are the model's impressions of the design as a
+     whole. They are reported for interest only &#8212; they are not
+     measurements of a design principle and they do not affect the category
+     scores.</p>
   <ul class="ai-factors">
-    {% for f in r.ai_factors %}
+    {% for f in ai.factors %}
     <li><strong>{{ f.name }}:</strong> {{ f.reading }}
         <span class="ai-val">{{ (f.value * 100)|round|int }}%</span></li>
     {% endfor %}
   </ul>
   {% endif %}
 
-  <p class="ai-note">This figure comes from a small model trained on designs
-     judged by a human reviewer. It is a second opinion that complements the
-     rule-based scores above &#8212; it does not replace them.</p>
+  {% if ai.gap is not none %}
+  <p class="ai-agree">Compared with the rule-based design-principle score:
+     the AI aesthetic estimate is {{ ai.gap|abs }}
+     point{{ 's' if ai.gap|abs != 1 }}
+     {% if ai.gap > 0 %}higher than{% elif ai.gap < 0 %}lower than{% else %}the same as{% endif %}
+     the rule-based score ({{ ai.score }} vs {{ r.overall }}). The two
+     figures answer different questions and are deliberately kept separate.</p>
+  {% endif %}
 </section>
 {% else %}
 <section class="panel ai-panel ai-empty">
-  <h2>AI estimate</h2>
-  <p class="muted">Not available for this report &#8212; no model had been
-     trained when this design was analysed. Once a model exists, new
-     assessments will include an AI estimate alongside the rule-based scores.</p>
+  <h2>AI-Assisted Assessment</h2>
+
+  <dl class="ai-meta">
+    <div><dt>Model</dt><dd>{{ ai.label }}</dd></div>
+    <div><dt>Status</dt><dd class="ai-off">{{ ai.status }}</dd></div>
+    <div><dt>AI aesthetic score</dt><dd>&#8212;</dd></div>
+  </dl>
+
+  <p class="muted">The AI assessment could not be produced for this analysis
+     &#8212; the pre-trained model was unavailable when this design was
+     analysed. This does <strong>not</strong> affect the report: the
+     rule-based computer-vision assessment below is complete and valid.</p>
+
+  <p class="ai-note">The AI component is optional and runs in addition to
+     the computer-vision analysis. When it cannot run, the
+     design-principle scores, feedback, and history are unaffected.</p>
 </section>
 {% endif %}
 
