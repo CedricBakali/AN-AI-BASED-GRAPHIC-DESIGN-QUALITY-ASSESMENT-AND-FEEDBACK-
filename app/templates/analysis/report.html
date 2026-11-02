@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full Assessment Report - DesignScore</title>
+{% if css %}
+<style>{{ css }}</style>
+{% else %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+{% endif %}
+</head>
+<body class="doc{% if download %} is-download{% endif %}">
+
+{# ------------------------------------------------------------------ #}
+{# Document header                                                     #}
+{# ------------------------------------------------------------------ #}
+<header class="doc-top">
+  <div class="doc-brand">
+    <span class="doc-mark">DesignScore</span>
+    <span class="doc-kind">Graphic Design Quality Assessment</span>
+  </div>
+  {% if not download %}
+  <div class="doc-actions no-print">
+    <button type="button" class="btn-ghost" onclick="window.print()">Print / Save as PDF</button>
+    <a class="btn-primary" href="{{ url_for('report_download', analysis_id=r.id) }}">Download Report</a>
+  </div>
+  {% endif %}
+</header>
+
+<main class="doc-body">
+
+  <h1 class="doc-title">Design Assessment Report</h1>
+  <p class="doc-sub">{{ r.filename }} · Assessed on {{ when }} ·
+     Report #{{ r.id }}</p>
+
+  {# ---------------------------------------------------------------- #}
+  {# 1. Preview                                                        #}
+  {# ---------------------------------------------------------------- #}
+  <section class="doc-block">
+    <h2>Your Design</h2>
+    {% if preview_src %}
+    <img class="doc-preview" src="{{ preview_src }}" alt="Uploaded design: {{ r.filename }}">
+    {% else %}
+    <p class="muted">The preview file could not be opened.</p>
+    {% endif %}
+    {% if r.palette %}
+    <div class="palette">
+      {% for hex in r.palette %}<span style="background: {{ hex }}" title="{{ hex }}"></span>{% endfor %}
+    </div>
+    <p class="muted small">Main colours found in your design.</p>
+    {% endif %}
+  </section>
+
+  {# ---------------------------------------------------------------- #}
+  {# 2. The two scores, side by side                                   #}
+  {# ---------------------------------------------------------------- #}
+  <section class="doc-block">
+    <h2>Scores at a Glance</h2>
+    <div class="score-pair">
+
+      <div class="score-card">
+        <span class="score-label">Design Quality Score</span>
+        <span class="score-num">{{ r.overall }}/100</span>
+        <span class="grade g-{{ r.grade[0]|lower }}">{{ r.grade }}</span>
+        <p class="score-note">How well your design follows the eight design
+          principles: colour, contrast, alignment, typography, white space,
+          layout, readability and visual hierarchy.</p>
+      </div>
+
+      <div class="score-card ai ai-panel">
+        <span class="score-label">AI Aesthetic Opinion</span>
+        {% if ai.available %}
+        <span class="score-num">{{ ai.score }}/100</span>
+        <span class="band">{{ ai.band }}</span>
+        <p class="score-note">A separate AI opinion about the overall visual
+          impression of your design.</p>
+        {% else %}
+        <span class="score-num none">–</span>
+        <span class="band off">Not available</span>
+        <p class="score-note">The AI could not look at this design, so there
+          is no AI opinion for it.</p>
+        {% endif %}
+      </div>
+
+    </div>
+    <p class="score-note doc-note">The two scores are measured separately
+      and are never added together. The design-quality score comes from the
+      eight design principles; the AI score is a general visual opinion of
+      how the design looks.</p>
+  </section>
+
+  {# ---------------------------------------------------------------- #}
+  {# 3. Every design principle                                         #}
+  {# ---------------------------------------------------------------- #}
+  <section class="doc-block">
+    <h2>Design Principle Scores</h2>
+    <p class="section-sub">Category scores for each principle, out of 100.</p>
+    <table class="doc-table">
+      <thead>
+        <tr><th>Principle</th><th class="num">Score</th><th>Rating</th><th>What we found</th></tr>
+      </thead>
+      <tbody>
+        {% for c in r.categories %}
+        <tr>
+          <td class="strong">{{ c.name }}</td>
+          <td class="num">{{ c.score }}</td>
+          <td>
+            <div class="bar {{ 'good' if c.score >= 75 else 'mid' if c.score >= 60 else 'low' }}"><i style="width: {{ c.score }}%"></i></div>
+          </td>
+          <td class="note">{{ c.summary }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  {# ---------------------------------------------------------------- #}
+  {# 4. Feedback                                                       #}
+  {# ---------------------------------------------------------------- #}
+  <section class="doc-block">
+    <h2>Strengths</h2>
+    <p class="section-sub">What your design already does well.</p>
+    {% if fb.strengths %}
+    <ul class="doc-list good">
+      {% for s in fb.strengths %}
+      <li><strong>{{ s.name }} — {{ s.score }}/100</strong><br>{{ s.summary }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">No principle reached the strength mark this time.</p>
+    {% endif %}
+  </section>
+
+  <section class="doc-block">
+    <h2>Areas to Improve</h2>
+    <p class="section-sub">Weaknesses we found in your design.</p>
+    {% if fb.weaknesses %}
+    <ul class="doc-list fix">
+      {% for w in fb.weaknesses %}
+      <li><strong>{{ w.name }} — {{ w.score }}/100</strong><br>{{ w.summary }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">Nothing fell below the weakness mark.</p>
+    {% endif %}
+  </section>
+
+  <section class="doc-block">
+    <h2>Recommended Actions</h2>
+    <p class="section-sub">Recommendations to improve your design, easiest fix first.</p>
+    {% if fb.recommendations %}
+    <ol class="doc-list">
+      {% for rec in fb.recommendations %}
+      <li><strong>{{ rec.category }}</strong> — {{ rec.text }}</li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p class="muted">No action needed right now.</p>
+    {% endif %}
+  </section>
+
+  {# ---------------------------------------------------------------- #}
+  {# 5. What the AI thought                                            #}
+  {# ---------------------------------------------------------------- #}
+  <section class="doc-block">
+    <h2>AI Assessment Summary</h2>
+    {% if ai.available %}
+      <p class="section-sub">The AI gave this design {{ ai.score }}/100
+        ({{ ai.band|lower }}). Here is what it saw:</p>
+      <ul class="doc-list ai">
+        {% for f in ai.simple %}
+        <li><span class="ai-name">{{ f.name }}</span>
+            <span class="ai-reading">{{ f.reading }}</span></li>
+        {% endfor %}
+      </ul>
+      {% if ai.feedback %}<p class="doc-note">{{ ai.feedback }}</p>{% endif %}
+      {% if ai.gap == 0 %}
+      <p class="doc-note">The AI score is the same as the design-quality
+        score. The two scores are never combined.</p>
+      {% else %}
+      <p class="doc-note">The AI score is {{ ai.gap|abs }}
+        point{{ '' if ai.gap|abs == 1 else 's' }}
+        {{ 'higher' if ai.gap > 0 else 'lower' }} than the design-quality
+        score. The two scores are never combined.</p>
+      {% endif %}
+    {% else %}
+      <p class="muted">There is no AI opinion for this design. The
+        assessment above is complete without it.</p>
+    {% endif %}
+  </section>
+
+  {# ---------------------------------------------------------------- #}
+  {# 6. Technical evidence, kept for the academic record               #}
+  {# ---------------------------------------------------------------- #}
+  <details class="tech">
+    <summary>Technical AI Details</summary>
+    <div class="tech-body">
+      <dl class="ai-meta">
+        <div><dt>Model</dt><dd>{{ ai.label }}</dd></div>
+        <div><dt>Model identifier</dt><dd class="mono">{{ ai.model }}</dd></div>
+        <div><dt>Method</dt><dd>Zero-shot AI assessment using a pre-trained model</dd></div>
+        <div><dt>Status</dt><dd class="{{ 'ai-ok' if ai.available else 'ai-off' }}">{{ ai.status }}</dd></div>
+      </dl>
+      <p class="ai-scope">This is an AI-assisted assessment. It gives a general
+        visual opinion of your design. The design-principle scores are
+        calculated separately through computer-vision analysis.</p>
+      {% if ai.available %}
+      <p class="ai-note">{{ ai.explanation }}</p>
+      {% endif %}
+    </div>
+  </details>
+
+  <footer class="doc-foot">
+    <p>Generated by <strong>DesignScore</strong> — AI-Powered Graphic Design
+       Quality Assessment. {{ when }}</p>
+    {% if not download %}
+    <p class="no-print"><a href="{{ url_for('result', analysis_id=r.id) }}">Back to the result page</a></p>
+    {% endif %}
+  </footer>
+
+</main>
+</body>
+</html>

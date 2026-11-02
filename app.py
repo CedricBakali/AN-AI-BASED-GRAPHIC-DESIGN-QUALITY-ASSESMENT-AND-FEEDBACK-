@@ -6,11 +6,13 @@ instant, rule-based quality review across six core design principles.
 """
 from __future__ import annotations
 
+import base64
+import datetime
 import os
 import uuid
 
-from flask import (Flask, abort, flash, jsonify, redirect, render_template, request,
-                   session, url_for)
+from flask import (Flask, Response, abort, flash, jsonify, redirect,
+                   render_template, request, session, url_for)
 from werkzeug.utils import secure_filename
 
 from app.models import database
@@ -92,6 +94,84 @@ def _ai_factors(ai: dict) -> list[dict]:
                         f"negative lean ({round((1 - p) * 100)}%)"),
         })
     return factors
+
+
+# ---------------------------------------------------------------------------
+# Plain-English wording for the result page and the full report.
+#
+# Nothing here changes a score. These helpers only translate numbers that
+# were already measured into words a beginner designer can read, so the
+# user-facing pages never have to show raw prompt-pair percentages.
+# ---------------------------------------------------------------------------
+
+#: Shared bands for the AI opinion. Fixed thresholds, reused for the AI
+#: score and for every impression, so a number always maps to the same
+#: word. No invented precision.
+AI_BANDS = (
+    (85, "Excellent"),
+    (70, "Very good"),
+    (55, "Good"),
+    (45, "Fair"),
+)
+
+#: Reading used for any score below the lowest band.
+BOTTOM_WORD = "Needs improvement"
+
+#: Same bottom band, reworded where a different phrase reads better.
+BOTTOM_WORD_OVERRIDES = {"Attention-grabbing": "Could be improved"}
+
+#: Friendly names for the stored AI impressions.
+IMPRESSION_NAMES = {
+    "Overall design quality": "Overall visual impression",
+    "Attractiveness": "Visual appeal",
+    "Professionalism": "Professional appearance",
+    "Attention-grabbing": "Visual impact",
+}
+
+
+def ai_band(score) -> str:
+    """Turn a 0-100 AI score into a short plain-English reading."""
+    if score is None:
+        return "Unavailable"
+    value = int(score)
+    for threshold, label in AI_BANDS:
+        if value >= threshold:
+            return label
+    return BOTTOM_WORD
+
+
+def _impression_row(factor: dict) -> dict:
+    """Translate one stored AI reading into friendly words.
+
+    Returns the same {name, value, shape} shape the report already uses,
+    but with a human label and a band instead of "positive/negative lean".
+    """
+    name = str(factor.get("name") or "Impression")
+    probability = float(factor.get("value") or 0.0)
+    reading = ai_band(int(round(probability * 100)))
+    if reading == BOTTOM_WORD:
+        reading = BOTTOM_WORD_OVERRIDES.get(name, BOTTOM_WORD)
+    return {
+        "name": IMPRESSION_NAMES.get(name, name),
+        "value": round(probability, 4),
+        "reading": reading,
+    }
+
+
+def _ai_feedback(rows: list[dict]) -> str:
+    """One short, honest sentence built from the translated impressions."""
+    if not rows:
+        return ""
+    best = max(rows, key=lambda row: row["value"])
+    worst = min(rows, key=lambda row: row["value"])
+    if best is worst:
+        return (f"Your {best['name'].lower()} reads as "
+                f"{best['reading'].lower()}.")
+    line = (f"Your {best['name'].lower()} was the strongest point "
+            f"({best['reading'].lower()}).")
+    if worst["reading"] in {BOTTOM_WORD, "Could be improved", "Fair"}:
+        line += f" Your {worst['name'].lower()} needs the most work."
+    return line
 
 
 @app.route("/")
@@ -184,6 +264,9 @@ def _ai_panel(record: dict) -> dict:
             "available": False,
             "status": "Unavailable",
             "score": None,
+            "band": "",
+            "simple": [],
+            "feedback": "",
             "explanation": "",
             "probability": None,
             "gap": None,
@@ -211,15 +294,114 @@ def _ai_panel(record: dict) -> dict:
         'was trained or fine-tuned on this project\u2019s data.'
     )
 
+    simple = [_impression_row(f) for f in base["factors"]
+              if isinstance(f, dict)]
+
     base.update({
         "available": True,
         "status": "Available",
         "score": int(score),
+        "band": ai_band(int(score)),
+        "simple": simple,
+        "feedback": _ai_feedback(simple),
         "explanation": explanation,
         "probability": round(float(probability), 3),
         "gap": int(score) - int(record.get("overall") or 0),
     })
     return base
+
+
+# ---------------------------------------------------------------------------
+# Full assessment report: viewing it and downloading it.
+# ---------------------------------------------------------------------------
+
+def _date_label(value) -> str:
+    """Turn the stored timestamp into a date a person can read.
+
+    '2026-11-02T07:41:07' -> '2 November 2026, 07:41'
+    """
+    text = str(value or "")
+    try:
+        stamp = datetime.datetime.fromisoformat(text)
+    except ValueError:
+        return text[:10]
+    return (f"{stamp.day} {stamp.strftime('%B %Y')}, "
+            f"{stamp.strftime('%H:%M')}")
+
+
+def _report_css() -> str:
+    """Inlined so a downloaded report still looks right with no server."""
+    path = os.path.join(BASE_DIR, "static", "css", "report.css")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return fh.read()
+    except OSError:
+        return ""
+
+
+def _preview_src(record: dict, download: bool) -> str:
+    """The design preview.
+
+    Viewing uses the normal static URL. A download embeds the image as a
+    data URI so the saved file still shows the design on its own.
+    """
+    rel = record.get("image_path") or ""
+    if not download:
+        return "/" + rel
+    if not rel:
+        return ""
+    # Only ever read the file name, and only from inside the upload folder.
+    name = rel.replace("\\", "/").rsplit("/", 1)[-1]
+    root = os.path.realpath(UPLOAD_DIR)
+    path = os.path.realpath(os.path.join(root, name))
+    if not path.startswith(root + os.sep):
+        return ""
+    try:
+        with open(path, "rb") as fh:
+            data = fh.read()
+    except OSError:
+        return ""
+    ext = (name.rsplit(".", 1)[-1] or "png").lower()
+    mime = {"jpg": "jpeg", "jpeg": "jpeg", "png": "png", "webp": "webp",
+            "bmp": "bmp", "gif": "gif"}.get(ext, "png")
+    encoded = base64.b64encode(data).decode("ascii")
+    return f"data:image/{mime};base64,{encoded}"
+
+
+def _report_context(analysis_id: int, download: bool) -> dict:
+    """Everything both report pages need. Never invents a value."""
+    record = database.get_analysis(analysis_id, session["user_id"])
+    if record is None:
+        abort(404)
+    return {
+        "r": record,
+        "fb": build_feedback(record["categories"]),
+        "ai": _ai_panel(record),
+        "download": download,
+        "css": _report_css(),
+        "preview_src": _preview_src(record, download),
+        "when": _date_label(record.get("created_at")),
+    }
+
+
+@app.route("/report/<int:analysis_id>")
+@login_required
+def report(analysis_id: int):
+    """The complete assessment, as a readable document."""
+    return render_template("analysis/report.html",
+                           **_report_context(analysis_id, download=False))
+
+
+@app.route("/report/<int:analysis_id>/download")
+@login_required
+def report_download(analysis_id: int):
+    """The same document as a self-contained file the user can keep."""
+    ctx = _report_context(analysis_id, download=True)
+    body = render_template("analysis/report.html", **ctx)
+    filename = f"DesignScore-Report-{analysis_id}.html"
+    return Response(body, mimetype="text/html", headers={
+        "Content-Disposition": f'attachment; filename="{filename}"',
+    })
 
 
 @app.route("/result/<int:analysis_id>")
@@ -230,7 +412,8 @@ def result(analysis_id: int):
         abort(404)
     fb = build_feedback(record["categories"])
     return render_template("analysis/result.html", r=record, fb=fb,
-                           ai=_ai_panel(record))
+                           ai=_ai_panel(record),
+                           when=_date_label(record.get("created_at")))
 
 
 @app.route("/history")

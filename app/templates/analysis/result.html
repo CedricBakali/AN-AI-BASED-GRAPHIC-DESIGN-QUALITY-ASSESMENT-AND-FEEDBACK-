@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Result - DesignScore</title>
+<title>Assessment Result - DesignScore</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ui.css') }}">
@@ -13,115 +13,144 @@
 <span class="brand">DesignScore · Assessment Report</span>
 <nav><a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a><a href="{{ url_for('history') }}">History</a><a href="{{ url_for('auth.logout') }}">Logout</a></nav>
 </header>
+
 <main class="report">
+
+{# ------------------------------------------------------------------ #}
+{# 1. The two scores, clearly separated                                #}
+{# ------------------------------------------------------------------ #}
 <section class="hero">
-<img src="/{{ r.image_path }}" alt="Uploaded design: {{ r.filename }}">
-<div>
-<div class="score-line">
-<span class="big">{{ r.overall }}<small>/100</small></span>
-<span class="grade g-{{ r.grade[0]|lower }}">{{ r.grade }}</span>
-</div>
-<h1>{{ r.filename }}</h1>
-<p class="date">Analyzed: {{ r.created_at }}</p>
-<div class="palette">{% for c in r.palette %}<span style="background:{{ c }}" title="{{ c }}"></span>{% endfor %}</div>
-</div>
+  <img src="/{{ r.image_path }}" alt="Your uploaded design: {{ r.filename }}">
+  <div class="hero-body">
+    <h1>{{ r.filename }}</h1>
+    <p class="date">Assessed on {{ when }}</p>
+
+    <div class="score-pair">
+
+      <div class="score-card">
+        <span class="score-label">Design Quality Score</span>
+        <span class="score-num">{{ r.overall }}/100</span>
+        <span class="grade g-{{ r.grade[0]|lower }}">{{ r.grade }}</span>
+        <p class="score-note">How well your design follows the eight design
+          principles: colour, contrast, alignment, typography, white space,
+          layout, readability and visual hierarchy. This score does not come
+          from the AI.</p>
+      </div>
+
+      <div class="score-card ai ai-panel">
+        <span class="score-label">AI Aesthetic Opinion</span>
+        {% if ai.available %}
+        <span class="score-num">{{ ai.score }}/100</span>
+        <span class="band">{{ ai.band }}</span>
+        <p class="score-note">A separate AI opinion about the overall visual
+          impression of your design.</p>
+        <p class="ai-feedback">{{ ai.feedback }}</p>
+        {% else %}
+        <span class="score-num none">–</span>
+        <span class="band off">Not available</span>
+        <p class="score-note">The AI could not look at this design, so there
+          is no AI opinion for it. Your design-quality score above is still
+          correct.</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
 </section>
 
-{% if ai.available %}
-<section class="panel ai-panel">
-  <h2>AI-Assisted Assessment <span class="v">{{ ai.score }}/100</span></h2>
+{# ------------------------------------------------------------------ #}
+{# 2. Every design principle, with its own score                       #}
+{# ------------------------------------------------------------------ #}
+<section class="panel">
+  <h2>Design Principle Scores</h2>
+  <p class="section-sub">Category scores for each principle, out of 100.</p>
+  <div class="cards">
+    {% for c in r.categories %}
+    <div class="card">
+      <h3>{{ c.name }} <span class="v">{{ c.score }}</span></h3>
+      <p>{{ c.summary }}</p>
+      <div class="bar {{ 'good' if c.score >= 75 else 'mid' if c.score >= 60 else 'low' }}"><i style="width: {{ c.score }}%"></i></div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
 
-  <dl class="ai-meta">
-    <div><dt>Model</dt><dd>{{ ai.label }}</dd></div>
-    <div><dt>Model identifier</dt><dd class="mono">{{ ai.model }}</dd></div>
-    <div><dt>Method</dt><dd>Zero-shot AI assessment (pre-trained model, inference only)</dd></div>
-    <div><dt>Status</dt><dd class="ai-ok">{{ ai.status }}</dd></div>
-    <div><dt>AI aesthetic score</dt><dd>{{ ai.score }}/100</dd></div>
-  </dl>
-
-  <p class="ai-scope"><strong>The AI score provides a general
-     visual/aesthetic assessment. The design-principle scores are produced
-     separately through computer-vision analysis.</strong> The pre-trained
-     model does not measure typography, alignment, white space, or any other
-     individual design principle &#8212; those measurements come from the
-     deterministic analysis shown in the category scores below.</p>
-
-  <p class="ai-note">{{ ai.explanation }}</p>
-
-  {% if ai.factors %}
-  <h3>General impressions from the AI model</h3>
-  <p class="ai-subnote">These are the model's impressions of the design as a
-     whole. They are reported for interest only &#8212; they are not
-     measurements of a design principle and they do not affect the category
-     scores.</p>
-  <ul class="ai-factors">
-    {% for f in ai.factors %}
-    <li><strong>{{ f.name }}:</strong> {{ f.reading }}
-        <span class="ai-val">{{ (f.value * 100)|round|int }}%</span></li>
+{# ------------------------------------------------------------------ #}
+{# 3. What is good, what to fix, what to do next                        #}
+{# ------------------------------------------------------------------ #}
+<section class="panel strengths">
+  <h2>Strengths</h2>
+  <p class="section-sub">What your design already does well.</p>
+  {% if fb.strengths %}
+  <ul>
+    {% for s in fb.strengths %}
+    <li><strong>{{ s.name }}</strong> — {{ s.score }}/100. {{ s.summary }}</li>
     {% endfor %}
   </ul>
+  {% else %}
+  <p class="muted">No principle reached the strength mark this time. Focus on
+    the recommendations below first.</p>
   {% endif %}
-
-  {% if ai.gap is not none %}
-  <p class="ai-agree">Compared with the rule-based design-principle score:
-     the AI aesthetic estimate is {{ ai.gap|abs }}
-     point{{ 's' if ai.gap|abs != 1 }}
-     {% if ai.gap > 0 %}higher than{% elif ai.gap < 0 %}lower than{% else %}the same as{% endif %}
-     the rule-based score ({{ ai.score }} vs {{ r.overall }}). The two
-     figures answer different questions and are deliberately kept separate.</p>
-  {% endif %}
-</section>
-{% else %}
-<section class="panel ai-panel ai-empty">
-  <h2>AI-Assisted Assessment</h2>
-
-  <dl class="ai-meta">
-    <div><dt>Model</dt><dd>{{ ai.label }}</dd></div>
-    <div><dt>Status</dt><dd class="ai-off">{{ ai.status }}</dd></div>
-    <div><dt>AI aesthetic score</dt><dd>&#8212;</dd></div>
-  </dl>
-
-  <p class="muted">The AI assessment could not be produced for this analysis
-     &#8212; the pre-trained model was unavailable when this design was
-     analysed. This does <strong>not</strong> affect the report: the
-     rule-based computer-vision assessment below is complete and valid.</p>
-
-  <p class="ai-note">The AI component is optional and runs in addition to
-     the computer-vision analysis. When it cannot run, the
-     design-principle scores, feedback, and history are unaffected.</p>
-</section>
-{% endif %}
-
-<h2>Category scores</h2>
-<div class="cards">
-{% for cat in r.categories %}
-<section class="card">
-<h3>{{ cat.name }} <span class="v">{{ cat.score }}/100</span></h3>
-<p>{{ cat.summary }}</p>
-<div class="bar {% if cat.score >= 75 %}good{% elif cat.score >= 60 %}mid{% else %}low{% endif %}"><i style="width:{{ cat.score }}%"></i></div>
-</section>
-{% endfor %}
-</div>
-
-<section class="panel strengths">
-<h2>✓ Strengths</h2>
-{% if fb.strengths %}
-<ul>{% for s in fb.strengths %}<li><strong>{{ s.name }} ({{ s.score }}/100):</strong> {{ s.summary }}</li>{% endfor %}</ul>
-{% else %}<p class="muted">No category reached 75 yet — see recommendations below.</p>{% endif %}
 </section>
 
 <section class="panel weaknesses">
-<h2>! Weaknesses</h2>
-{% if fb.weaknesses %}
-<ul>{% for w in fb.weaknesses %}<li><strong>{{ w.name }} ({{ w.score }}/100):</strong> {{ w.summary }}</li>{% endfor %}</ul>
-{% else %}<p class="muted">No serious weaknesses. Good work.</p>{% endif %}
+  <h2>Areas to Improve</h2>
+  <p class="section-sub">Weaknesses we found in your design.</p>
+  {% if fb.weaknesses %}
+  <ul>
+    {% for w in fb.weaknesses %}
+    <li><strong>{{ w.name }}</strong> — {{ w.score }}/100. {{ w.summary }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted">Nothing fell below the weakness mark. Keep the good work
+    going.</p>
+  {% endif %}
 </section>
 
 <section class="panel reco">
-<h2>→ Recommendations</h2>
-<ol>{% for rec in fb.recommendations %}<li><strong>{{ rec.category }}:</strong> {{ rec.text }}</li>{% endfor %}</ol>
+  <h2>Recommended Actions</h2>
+  <p class="section-sub">Recommendations to improve your design, easiest fix first.</p>
+  {% if fb.recommendations %}
+  <ol>
+    {% for rec in fb.recommendations %}
+    <li><strong>{{ rec.category }}</strong> — {{ rec.text }}</li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="muted">No action needed right now.</p>
+  {% endif %}
 </section>
+
+{# ------------------------------------------------------------------ #}
+{# 4. The way through to the complete document                          #}
+{# ------------------------------------------------------------------ #}
+<div class="cta">
+  <a class="btn-primary" href="{{ url_for('report', analysis_id=r.id) }}">View Full Report</a>
+  <a class="btn-ghost" href="{{ url_for('history') }}">Back to History</a>
+</div>
+
+{# ------------------------------------------------------------------ #}
+{# 5. Technical detail, kept but out of the way                         #}
+{# ------------------------------------------------------------------ #}
+<details class="tech">
+  <summary>Technical AI Details</summary>
+  <div class="tech-body">
+    <dl class="ai-meta">
+      <div><dt>Model</dt><dd>{{ ai.label }}</dd></div>
+      <div><dt>Model identifier</dt><dd class="mono">{{ ai.model }}</dd></div>
+      <div><dt>Method</dt><dd>Zero-shot AI assessment using a pre-trained model</dd></div>
+      <div><dt>Status</dt><dd class="{{ 'ai-ok' if ai.available else 'ai-off' }}">{{ ai.status }}</dd></div>
+    </dl>
+    <p class="ai-scope">This is an AI-assisted assessment. It gives a general
+      visual opinion of your design. The design-principle scores are
+      calculated separately through computer-vision analysis.</p>
+    {% if ai.available %}
+    <p class="ai-note">{{ ai.explanation }}</p>
+    {% endif %}
+  </div>
+</details>
+
 </main>
-<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

@@ -380,28 +380,6 @@ body {
 }
 
 
-.notification {
-    width: 35px;
-    height: 35px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin-right: 5px;
-
-    border: 1px solid #e8ebf1;
-
-    border-radius: 9px;
-
-    color: #737b8d;
-
-    font-size: 15px;
-
-    cursor: pointer;
-}
-
-
 .user-avatar {
     width: 35px;
     height: 35px;
@@ -1119,4 +1097,3 @@ body {
 .upload-icon svg { width: 20px; height: 20px; }
 .analyse-icon svg { width: 21px; height: 21px; }
 .empty-icon svg { width: 24px; height: 24px; }
-.notification svg { width: 17px; height: 17px; }

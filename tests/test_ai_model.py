@@ -263,7 +263,9 @@ def test_report_shows_ai_panel_when_clip_available(client, logged_client,
     assert rv.status_code == 302
 
     html = logged_client.get(rv.location).data.decode()
-    assert "AI-Assisted Assessment" in html
+    # The section was renamed for normal users; the technical evidence is
+    # still present further down the page under "Technical AI Details".
+    assert "AI Aesthetic Opinion" in html
     assert "ai-panel" in html
     assert "73/100" in html
     # Model identity is shown honestly.
@@ -317,7 +319,7 @@ def test_report_shows_unavailable_when_clip_is_not(client, logged_client,
     assert record["ai_model"] is None
 
     html = logged_client.get(rv.location).data.decode()
-    assert "AI-Assisted Assessment" in html
+    assert "AI Aesthetic Opinion" in html
     assert "Unavailable" in html
     # The rule-based report must still be complete.
     assert "Category scores" in html

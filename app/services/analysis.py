@@ -222,7 +222,9 @@ def score_color_harmony(img: np.ndarray, palette) -> CategoryResult:
         )
 
     score = max(0, min(100, int(round(score))))
-    summary = f"Palette reads as a {scheme} scheme."
+    # "an analogous scheme", "a complementary scheme" - pick the article.
+    article = "an" if scheme[:1].lower() in "aeiou" else "a"
+    summary = f"Palette reads as {article} {scheme} scheme."
     if scheme in ("busy / unstructured", "mixed"):
         suggestions.append(
             "Reduce to 2-3 core colours chosen from a colour-wheel relationship "
