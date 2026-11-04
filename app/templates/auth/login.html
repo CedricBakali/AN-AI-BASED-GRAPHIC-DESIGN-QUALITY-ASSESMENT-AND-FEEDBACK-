@@ -77,6 +77,7 @@
                   action="{{ url_for('auth.login') }}"
                   class="auth-form">
 
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <!-- Email -->
                 <div class="form-group">

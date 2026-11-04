@@ -13,7 +13,14 @@ A user uploads an image (`PNG, JPG, JPEG, WEBP, BMP, GIF`, max 10 MB). The syste
 
 Results are persisted per-user in SQLite (`app/models/designscore.db`) and viewable via dashboard, result page, and history.
 
-Supporting `app/ai/` (`clip_analyzer.py`, `nima_analyzer.py`, `vlm_analyzer.py`, `model_manager.py`) and `app/cv/` (`color_analysis.py`, `contrast_analysis.py`, `layout_analysis.py`, `typography_analysis.py`, `whitespace_analysis.py`, `preprocessing.py`) modules provide experimental / modular extensions to the core rule-based pipeline.
+The **Design Quality Score above is never mixed with AI output.** Two further, clearly-separated opinions are shown next to it when available:
+
+- **AI Visual Assessment** — zero-shot CLIP (`openai/clip-vit-base-patch32`) scores the image 0–100 against eight plain-language design statements (`app/ai/clip_analyzer.py`).
+- **NIMA aesthetic score** — a VGG-16 trained on the AVA dataset reports aesthetic quality on its **native 0–10 scale** (`app/ai/nima_analyzer.py`).
+
+Both are labelled and reported separately; neither is averaged with the other or with the deterministic score, and no combined weighted total exists anywhere in the code. Model weights (~670 MB total) are fetched on first run into gitignored folders and are never committed.
+
+Supporting `app/ai/` (`clip_analyzer.py` and `nima_analyzer.py` — both live; `model_manager.py`, `model_loader.py`, `aesthetic_analyzer.py` — shared loading helpers; `vlm_analyzer.py` — an empty placeholder) and `app/cv/` (`preprocessing.py`, `feature_extraction.py` — shared image helpers) back the core rule-based pipeline.
 
 ### Key Features
 - User auth: register / login / logout with hashed passwords, session management, `login_required` + `admin_required` guards, `user` / `admin` roles (register always creates `user`), active-flag check.
@@ -24,7 +31,9 @@ Supporting `app/ai/` (`clip_analyzer.py`, `nima_analyzer.py`, `vlm_analyzer.py`,
 - Admin: separate `/admin/` dashboard (stats, recent activity), user list, per-user detail, enable/disable accounts; all role-guarded backend-side.
 - Persistence: `users` and `analyses` tables, per-user isolation (`WHERE user_id = ?`), last-30 history.
 - Dashboard: total designs, assessments completed, average score, recent assessments — all from the database.
-- Tests: `pytest tests/` — 19 tests (analysis, auth, scoring/feedback, upload + isolation) on an isolated temp DB.
+- Reports: simple-English result page with the Design Quality Score and the AI Visual Assessment kept apart, a collapsible Technical AI Details block, a Full Report, and a Print / Save-as-PDF button (`@media print` styles in `result.css` / `report.css`).
+- Security: hashed passwords, server-side role checks, session-bound CSRF tokens on every form, per-owner access control on `/static/uploads/`, random persisted secret key, debug mode off by default.
+- Tests: `pytest tests/` — 128 tests (analysis, auth, scoring/feedback, upload + isolation, report wording, CLIP, NIMA real inference, security, upload privacy, CSRF) on an isolated temp DB.
 
 ## 2. Architecture
 
@@ -64,29 +73,32 @@ Overall = mean of 8 categories (`compute_overall`). Grade: ≥90 A, ≥80 B, ≥
 - Backend: Python, Flask, Werkzeug
 - Vision: OpenCV (`cv2`), NumPy, Pillow
 - DB: SQLite (`sqlite3`), JSON-serialized palette/categories
-- Frontend: Jinja2 (`app/templates/base.html`, `index.html`, `auth/`, `dashboard/`, `analysis/`, `history/`), CSS in `static/`, root `templates/index.html` + `index.html`
-- Tests: `tests/test_analysis.py`, `test_auth.py`, `test_scoring.py`, `test_upload.py`
+- Frontend: Jinja2 (`app/templates/` — `auth/`, `dashboard/`, `analysis/`, `history/`, `admin/`, `profile/`, `partials/shell.html`), CSS in `static/css/`
+- AI: PyTorch (CPU) + `timm` for NIMA, Hugging Face `transformers` for CLIP
+- Tests: `tests/test_analysis.py`, `test_auth.py`, `test_scoring.py`, `test_upload.py`, `test_ai_model.py`, `test_clip_analyzer.py`, `test_nima.py`, `test_report.py`, `test_security.py`, `test_uploads_privacy.py`, `test_csrf.py`
 - Docs: `UML Diagrams/*.puml` (use-case, class, sequence, activity, Level 0/1/2 DFD)
 
 ## 5. Project Structure
 
 ```
-app.py                  # routes: /, /analyze, /result, /history (+ blueprint registration)
-config.py               # central Config: secret, upload limits, paths
-app/routes/             # auth.py, dashboard.py, analysis.py (helpers), admin.py, history.py (empty)
+app.py                  # routes: /, /analyze, /result, /history (+ blueprint registration, upload privacy guard, CSRF check)
+config.py               # central Config: secret resolution, debug flag, upload limits, paths
+app/routes/             # auth.py, dashboard.py, analysis.py (helpers), admin.py, training.py (AI labelling UI)
 app/services/           # analysis.py (8 scorers), scoring.py (overall+grade), feedback.py (strengths/weaknesses)
-app/models/             # database.py, user.py, design.py / assessment.py (empty placeholders), designscore.db
-app/cv/                 # contrast_analysis.py (reference copy); color/layout/typography/whitespace/preprocessing empty
-app/ai/                 # clip/nima/vlm/model_manager — empty stubs for future AI direction, not wired
-app/templates/          # auth/, dashboard/, analysis/result.html, history/history.html, admin/
-static/                 # css/, images/, uploads/
-tests/                  # conftest.py + test_analysis/auth/scoring/upload.py (19 tests, isolated temp DB)
+app/models/             # database.py, user.py, designscore.db
+app/cv/                 # preprocessing.py, feature_extraction.py (shared image helpers)
+app/ai/                 # clip_analyzer.py + nima_analyzer.py (live), model_manager/model_loader/aesthetic_analyzer (helpers), vlm_analyzer.py (empty)
+app/templates/          # auth/, dashboard/, analysis/result.html + report.html, history/, admin/, profile/, partials/
+static/                 # css/, images/, uploads/ (gitignored)
+tests/                  # conftest.py + 11 test modules (128 tests, isolated temp DB)
 ```
 
 ## 6. Data Model (SQLite)
 
 `users(id, username, email UNIQUE, password_hash, role[user|admin], is_active, created_at)`
-`analyses(id, user_id FK->users CASCADE, filename, image_path, overall, grade, palette JSON, categories JSON, created_at)`
+`analyses(id, user_id FK->users CASCADE, filename, image_path, overall, grade, palette JSON, categories JSON, ai_score, ai_factors JSON, ai_model, nima_score, nima_model, created_at)`
+
+`ai_score` is CLIP's 0–100 opinion, `nima_score` is NIMA's native 0–10 opinion; both are `NULL` when that model was unavailable for that run. Neither is ever folded into `overall`.
 
 ## 7. Setup & Run
 
@@ -95,15 +107,22 @@ pip install -r requirements.txt
 python app.py
 # http://127.0.0.1:5000 -> redirects / to auth.login
 python -m pytest tests/ -q
-# 19 passed on an isolated temp DB (real designscore.db untouched)
+# 128 passed on an isolated temp DB (real designscore.db untouched)
 ```
 
-Set `DESIGNSCORE_SECRET` env var in production (defaults to `dev-secret-change-me`).
+The secret key is resolved by `config.resolve_secret_key()`: the `DESIGNSCORE_SECRET` environment variable wins if set, otherwise a random key is generated once and persisted in `.designscore_secret` (gitignored). No hardcoded fallback secret exists. `FLASK_DEBUG=1` is required to enable the interactive debugger; it is off by default.
+
+First run downloads the CLIP and NIMA weights into gitignored folders (`app/ai/weights/` and the Hugging Face cache); set `DESIGNSCORE_CLIP_WARMUP=0` to skip the CLIP warm-up (used by the test suites).
+
+Validation: `python scripts/validate_clip.py` computes Spearman/Pearson correlation and a bootstrap confidence interval between CLIP's scores and a **user-supplied** human-ratings CSV (`validation/ratings.csv`). It ships with no dataset and no results, and exits with an explanatory error until you supply real ratings.
 
 Upload flow: Dashboard → choose image → POST `/analyze` → redirect `/result/<id>`; `/history` lists last 30.
 
 ## 8. Limitations & Next Steps
 
-- Rule-based only (honestly so — no model trained); typography uses MSER heuristic, may miss stylized text.
+- The 0–100 Design Quality Score is still rule-based — no model has been trained on human ratings for it; typography uses an MSER heuristic and may miss stylized text.
 - Palette contrast uses top-2 k-means colours, not true text/background segmentation.
-- Future: wire in `app/ai/` (CLIP/NIMA/VLM) features behind the same 0–100 scorers, admin reports export, design refresh (deferred by owner until backend done).
+- CLIP and NIMA are wired in but **not yet validated against human ratings**; `scripts/validate_clip.py` is the scaffold for that, and until real ratings are supplied the AI scores are a second opinion, not ground truth.
+- `app/ai/vlm_analyzer.py` remains an empty placeholder — a VLM is not implemented.
+- Residual security note: `/logout` is still reachable as a GET link (forced-logout CSRF, low severity, deliberately left unchanged in this pass).
+- Future: admin report export, design refresh (deferred by owner until backend done).

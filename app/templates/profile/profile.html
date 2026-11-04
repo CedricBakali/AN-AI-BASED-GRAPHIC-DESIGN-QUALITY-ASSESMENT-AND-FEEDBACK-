@@ -272,6 +272,8 @@
                           method="POST"
                           class="stacked-form">
 
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                         <label class="field">
                             <span>Current password</span>
                             <input type="password"

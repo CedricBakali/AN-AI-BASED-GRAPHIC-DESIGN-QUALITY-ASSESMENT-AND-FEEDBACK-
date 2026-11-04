@@ -52,6 +52,7 @@ here changes what users see on their reports.</p>
 
 {% if pending %}
 <form class="label-card" method="POST" action="{{ url_for('training.save') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="image_path" value="{{ pending[0] }}">
     <img src="/{{ pending[0] }}" alt="Design to judge">
     <p class="hint">Design {{ counts.done + 1 }} of {{ counts.total }} · {{ pending[0].split('/')[-1] }}</p>
@@ -72,10 +73,12 @@ here changes what users see on their reports.</p>
 
 <div class="label-actions">
     <form method="POST" action="{{ url_for('training.undo') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn-plain">Undo last</button>
     </form>
     <form method="POST" action="{{ url_for('training.reset') }}"
           onsubmit="return confirm('Clear every label? This cannot be undone.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn-plain danger">Clear all labels</button>
     </form>
 </div>

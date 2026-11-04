@@ -44,6 +44,16 @@ def login_required(view):
             flash("Please log in first.")
             return redirect(url_for("auth.login"))
 
+        # Re-read the account so a disabled or deleted user loses access
+        # immediately, not only at the next login. The stale credential is
+        # destroyed rather than left in the cookie to be re-checked forever.
+        # Mirrors @admin_required, which already does this.
+        user = get_user_by_id(session.get("user_id"))
+        if user is None or not user["is_active"]:
+            session.clear()
+            flash("Please log in first.")
+            return redirect(url_for("auth.login"))
+
         return view(*args, **kwargs)
 
     return wrapped

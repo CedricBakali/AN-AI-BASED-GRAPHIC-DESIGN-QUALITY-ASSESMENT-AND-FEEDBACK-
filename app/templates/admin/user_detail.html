@@ -54,6 +54,7 @@
     <form action="{{ url_for('admin.toggle_user', user_id=user.id) }}"
           method="POST"
           onsubmit="return confirm('{{ 'Disable' if user.is_active else 'Enable' }} {{ user.username }}&#39;s account?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="{{ 'btn-warn' if user.is_active else 'btn-ok' }}">
             {% if user.is_active %}Disable account{% else %}Enable account{% endif %}
         </button>

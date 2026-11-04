@@ -22,7 +22,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 
 import joblib
 import numpy as np
@@ -126,7 +126,9 @@ def train_model(feature_rows: list[dict],
     }
 
     info = ModelInfo(
-        trained_at=datetime.utcnow().isoformat(timespec="seconds"),
+        trained_at=datetime.now(timezone.utc)
+                       .replace(tzinfo=None)
+                       .isoformat(timespec="seconds"),
         n_samples=len(y),
         n_good=n_good,
         n_weak=n_weak,

@@ -15,6 +15,16 @@ torchvision==0.29.1
 transformers==4.57.6
 
 # ------------------------------------------------------------------
+# SECOND, independent AI opinion: NIMA (app/ai/nima_analyzer.py).
+# Only the backbone library is required - the released NIMA checkpoint is
+# downloaded once into the same gitignored app/ai/weights/ folder and is
+# never committed. Deliberately NOT pyiqa: pyiqa requires transformers>=5.0
+# (pinned above for CLIP) plus bitsandbytes/tensorboard/facexlib, which
+# would risk the production model.
+# ------------------------------------------------------------------
+timm==1.0.30
+
+# ------------------------------------------------------------------
 # EXPERIMENTAL / LEGACY - the scikit-learn labelling experiment
 # (app/ai/model_manager.py, scripts/train_model.py). Still imported,
 # so it stays declared, but it is NOT part of the /analyze runtime

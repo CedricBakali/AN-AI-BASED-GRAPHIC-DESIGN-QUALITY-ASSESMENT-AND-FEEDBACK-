@@ -256,3 +256,98 @@ def test_result_page_has_no_notification_icon(client, logged_client,
     analysis_id = _analysis_id(_png_upload(logged_client, "nav.png"))
     html = logged_client.get(f"/result/{analysis_id}").data.decode()
     assert "notification" not in html
+
+
+# ---------------------------------------------------------- print / save
+
+def _css(name: str) -> str:
+    import os
+
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                        "static", "css", name)
+    with open(path, encoding="utf-8") as fh:
+        return fh.read()
+
+
+def _print_rules(css: str) -> str:
+    """The contents of the @media print block, matched by brace counting."""
+    start = css.find("@media print")
+    assert start != -1, "stylesheet has no @media print block"
+    open_brace = css.find("{", start)
+    depth = 0
+    for pos in range(open_brace, len(css)):
+        if css[pos] == "{":
+            depth += 1
+        elif css[pos] == "}":
+            depth -= 1
+            if depth == 0:
+                return css[open_brace:pos + 1]
+    raise AssertionError("@media print block is never closed")
+
+
+def test_full_report_prints_a_clean_document():
+    """Print/Save as PDF on the report hides controls, keeps the evidence."""
+    css = _css("report.css")
+    assert "@page" in css, "no paper margins defined"
+
+    rules = _print_rules(css)
+    assert "display: none !important" in rules
+    # navigation and buttons never go on paper...
+    assert ".no-print" in rules
+    assert ".doc-actions" in rules
+    # ...and neither does the technical control panel
+    assert ".tech" in rules
+    # colour that carries meaning (grade pills, score bars) must survive
+    assert "print-color-adjust" in rules
+
+
+def test_results_page_now_has_print_rules():
+    """Ctrl+P on the results page must not dump the whole app shell."""
+    css = _css("result.css")
+    rules = _print_rules(css)
+    assert "@page" in css, "no paper margins defined"
+    assert ".report-top nav" in rules      # Dashboard/History/Logout links
+    assert ".cta" in rules                 # action buttons
+    assert ".tech" in rules                # technical control panel
+    assert "break-inside" in rules         # cards must not split pages
+
+
+def test_results_page_offers_print_and_save(client, logged_client,
+                                            monkeypatch):
+    """Save/Print is reachable straight from the assessment results page."""
+    _with_ai(monkeypatch, score=44)
+    analysis_id = _analysis_id(_png_upload(logged_client, "printable.png",
+                                           (110, 190, 130)))
+
+    html = logged_client.get(f"/result/{analysis_id}").data.decode()
+    assert "Print / Save as PDF" in html
+    assert 'onclick="window.print()"' in html
+    # it reuses the report's one print path - no second generator
+    assert html.count("window.print()") == 1
+
+
+def test_full_report_offers_print_and_download(client, logged_client,
+                                               monkeypatch):
+    _with_ai(monkeypatch, score=44)
+    analysis_id = _analysis_id(_png_upload(logged_client, "printdoc.png",
+                                           (60, 90, 170)))
+
+    html = logged_client.get(f"/report/{analysis_id}").data.decode()
+    assert "Print / Save as PDF" in html
+    assert 'onclick="window.print()"' in html
+    assert f'href="/report/{analysis_id}/download"' in html
+
+
+def test_downloaded_report_never_shows_lean_language(client, logged_client,
+                                                     monkeypatch):
+    """The saved/printable file is user-facing wording too."""
+    _with_ai(monkeypatch, score=44)
+    analysis_id = _analysis_id(_png_upload(logged_client, "leanfree.png",
+                                           (80, 160, 90)))
+
+    body = logged_client.get(f"/report/{analysis_id}/download").data.decode()
+    for banned in ("positive lean", "negative lean", "prompt-pair"):
+        assert banned not in body, banned
+    # The honest technical evidence is still recorded in the detail block.
+    assert "openai/clip-vit-base-patch32" in body
+    assert "Technical AI Details" in body

@@ -191,6 +191,35 @@
   </section>
 
   {# ---------------------------------------------------------------- #}
+  {# 5b. A SECOND AI opinion - separate block, its own 0-10 scale       #}
+  {# ---------------------------------------------------------------- #}
+  <section class="doc-block nima-block">
+    <h2>Second AI Opinion — NIMA</h2>
+    {% if nima.available %}
+      <p class="nima-score">
+        <span class="nima-num">{{ nima.score }}</span>
+        <span class="nima-den">/10</span>
+        <span class="band nima-band">{{ nima.band }}</span>
+      </p>
+      {# The designer reads this first: what NIMA makes of THIS image. #}
+      <p class="nima-feedback">{{ nima.feedback }}</p>
+      <p class="nima-advice">
+        <span class="nima-next">Next step</span>{{ nima.advice }}
+      </p>
+      {# Small print below: what the number means, then what NIMA is. #}
+      <p class="nima-fine">{{ nima.reading }} {{ nima.explanation }}</p>
+      <p class="nima-separate">This number is not added to, averaged with,
+        or compared against either score in “Scores at a Glance”. NIMA was
+        trained on its own 1-10 rating task, so it reports that scale rather
+        than a score out of 100.</p>
+    {% else %}
+      <p class="muted">NIMA could not look at this design, so there is no
+        second opinion recorded for it. The assessment above is complete
+        without it.</p>
+    {% endif %}
+  </section>
+
+  {# ---------------------------------------------------------------- #}
   {# 6. Technical evidence, kept for the academic record               #}
   {# ---------------------------------------------------------------- #}
   <details class="tech">

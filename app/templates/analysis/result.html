@@ -59,6 +59,34 @@
 </section>
 
 {# ------------------------------------------------------------------ #}
+{# 1b. A SECOND AI opinion - deliberately its own block, outside the   #}
+{#     two-score panel, and on its own native 0-10 scale.              #}
+{# ------------------------------------------------------------------ #}
+<section class="panel nima">
+  <h2>Second AI Opinion — NIMA</h2>
+  {% if nima.available %}
+  <p class="nima-score">
+    <span class="nima-num">{{ nima.score }}</span>
+    <span class="nima-den">/10</span>
+    <span class="band nima-band">{{ nima.band }}</span>
+  </p>
+  {# The designer reads this first: what NIMA makes of THIS image. #}
+  <p class="nima-feedback">{{ nima.feedback }}</p>
+  <p class="nima-advice">
+    <span class="nima-next">Next step</span>{{ nima.advice }}
+  </p>
+  {# Small print below: what the number means, then what NIMA is. #}
+  <p class="nima-fine">{{ nima.reading }} {{ nima.explanation }}</p>
+  <p class="nima-separate">This number is not added to, averaged with, or
+    compared against either score above. It is a third, independent view of
+    the same picture.</p>
+  {% else %}
+  <p class="section-sub">NIMA could not look at this design, so there is no
+    second opinion for it. The assessment above is complete without it.</p>
+  {% endif %}
+</section>
+
+{# ------------------------------------------------------------------ #}
 {# 2. Every design principle, with its own score                       #}
 {# ------------------------------------------------------------------ #}
 <section class="panel">
@@ -127,6 +155,7 @@
 {# ------------------------------------------------------------------ #}
 <div class="cta">
   <a class="btn-primary" href="{{ url_for('report', analysis_id=r.id) }}">View Full Report</a>
+  <button type="button" class="btn-ghost no-print" onclick="window.print()">Print / Save as PDF</button>
   <a class="btn-ghost" href="{{ url_for('history') }}">Back to History</a>
 </div>
 

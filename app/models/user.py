@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timezone
 import sqlite3
 
 from app.models.database import get_connection
@@ -70,7 +70,9 @@ def create_user(
                 password_hash,
                 "user",
                 1,
-                datetime.utcnow().isoformat(timespec="seconds")
+                datetime.now(timezone.utc)
+                       .replace(tzinfo=None)
+                       .isoformat(timespec="seconds")
             )
         )
 

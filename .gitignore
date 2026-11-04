@@ -13,6 +13,8 @@ app/ai/weights/
 static/uploads/*
 !static/uploads/.gitkeep
 .env
+# Auto-generated session-signing key (config.resolve_secret_key) - never commit.
+.designscore_secret
 .venv/
 venv/
 .pytest_cache/

@@ -101,6 +101,7 @@
     display: inline-block; text-decoration: none; font-size: 15px;
     font-weight: 700; padding: 13px 26px; border-radius: 10px;
     border: 1px solid transparent; cursor: pointer; text-align: center;
+    font-family: inherit;
 }
 .btn-primary { background: #2563eb; color: #fff; box-shadow: 0 6px 16px rgba(37,99,235,.25); }
 .btn-primary:hover { background: #1d4ed8; }
@@ -138,6 +139,41 @@
     padding: 10px 12px; font-size: 13.5px; line-height: 1.55; margin-bottom: 12px; }
 .ai-note { color: #6b7280; font-size: 12.5px; line-height: 1.6; }
 
+/* ---------- second AI opinion (NIMA), deliberately set apart ---------- */
+.panel.nima { border-left: 5px solid #0891b2; }
+.nima-score { display: flex; align-items: baseline; gap: 4px; margin: 4px 0 10px; }
+.nima-num {
+    font-size: 36px; font-weight: 800; line-height: 1;
+    font-variant-numeric: tabular-nums; color: #0e7490;
+}
+.nima-den { font-size: 16px; font-weight: 700; color: #6b7280; }
+.nima-band { background: #ecfeff; color: #0e7490; }
+
+/* What the designer reads first: the verdict on this image, then one
+   next step. Deliberately the loudest text in this panel. */
+.nima-feedback {
+    font-size: 14.5px; font-weight: 600; line-height: 1.6;
+    color: #111827; margin: 0 0 10px;
+}
+.nima-advice {
+    color: #155e75; background: #ecfeff; border-left: 3px solid #06b6d4;
+    border-radius: 0 8px 8px 0; padding: 10px 12px; font-size: 13.5px;
+    line-height: 1.55; margin: 0 0 12px;
+}
+.nima-next {
+    display: block; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: #0891b2; margin-bottom: 4px;
+}
+
+/* Small print: what the number means, then what NIMA is. Kept quiet so
+   it supports the message instead of crowding it. */
+.nima-fine { color: #9ca3af; font-size: 12px; line-height: 1.55; }
+.nima-separate {
+    color: #6b7280; font-size: 12.5px; line-height: 1.6; margin-top: 10px;
+    padding-top: 10px; border-top: 1px dashed #a5f3fc;
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 720px) {
     .hero { grid-template-columns: 1fr; }
@@ -146,4 +182,31 @@
     .report-top nav a { margin: 0 10px; }
     .score-num { font-size: 38px; }
     .cta .btn-primary, .cta .btn-ghost { width: 100%; }
+}
+
+/* ---------- printing / save as PDF ---------- */
+@page { margin: 14mm; }
+@media print {
+    body { background: #fff; color: #111827; }
+    .report { max-width: none; padding: 0; }
+
+    /* navigation, buttons and technical controls never go on paper */
+    .report-top nav, .cta, .tech, .no-print { display: none !important; }
+
+    /* the brand line stays, printed as a plain document header */
+    .report-top {
+        background: #fff; color: #111827; border-bottom: 2px solid #111827;
+        padding: 0 0 8px;
+    }
+
+    /* keep the colours that carry meaning (scores, bars, grade pills) */
+    .score-card, .grade, .band, .bar, .bar i {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .hero, .panel, .card {
+        box-shadow: none; break-inside: avoid; page-break-inside: avoid;
+    }
+    a { text-decoration: none; color: inherit; }
 }

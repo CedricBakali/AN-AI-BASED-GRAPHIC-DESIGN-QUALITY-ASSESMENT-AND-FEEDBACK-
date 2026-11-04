@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from contextlib import contextmanager
 
 
@@ -120,6 +120,12 @@ def init_db() -> None:
         _ensure_column(conn, "analyses", "ai_factors", "TEXT")
         _ensure_column(conn, "analyses", "ai_model", "TEXT")
 
+        # SECOND, independent AI opinion (NIMA). Deliberately a separate
+        # pair of columns: nima_score is on NIMA's native 0-10 scale and is
+        # never merged with ai_score (0-100) or with overall (0-100).
+        _ensure_column(conn, "analyses", "nima_score", "REAL")
+        _ensure_column(conn, "analyses", "nima_model", "TEXT")
+
         # -----------------------------
         # DESIGN LABELS (AI training data)
         # One row per design a human judged. These labels teach the
@@ -166,7 +172,9 @@ def save_label(image_path: str, label: str, score: float,
                 created_at = excluded.created_at
             """,
             (image_path, label, score, features_json,
-             datetime.utcnow().isoformat(timespec="seconds"))
+             datetime.now(timezone.utc)
+                    .replace(tzinfo=None)
+                    .isoformat(timespec="seconds"))
         )
 
 
@@ -222,7 +230,9 @@ def save_analysis(
     result,
     ai_score: int | None = None,
     ai_factors: list | None = None,
-    ai_model: str | None = None
+    ai_model: str | None = None,
+    nima_score: float | None = None,
+    nima_model: str | None = None
 ) -> int:
     """
     Save an analysis belonging to a specific user.
@@ -233,6 +243,12 @@ def save_analysis(
         ai_factors: the AI's supporting readings, kept so the report stays
             explainable even after the model is later changed.
         ai_model: identifier of the AI model that produced ai_score.
+        nima_score: NIMA's expected rating on its native 0-10 scale, or
+            None when it was unavailable. Kept apart from ai_score on
+            purpose - the two are different measurements and are never
+            averaged together.
+        nima_model: identifier of the NIMA checkpoint that produced
+            nima_score.
 
     Returns:
         int: ID of the newly created analysis.
@@ -255,9 +271,11 @@ def save_analysis(
                 ai_score,
                 ai_factors,
                 ai_model,
+                nima_score,
+                nima_model,
                 created_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 user_id,
@@ -270,7 +288,11 @@ def save_analysis(
                 ai_score,
                 json.dumps(ai_factors) if ai_factors else None,
                 ai_model,
-                datetime.utcnow().isoformat(timespec="seconds")
+                nima_score,
+                nima_model,
+                datetime.now(timezone.utc)
+                       .replace(tzinfo=None)
+                       .isoformat(timespec="seconds")
             )
         )
 
@@ -296,6 +318,8 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
         "ai_factors": (json.loads(row["ai_factors"])
                        if row["ai_factors"] else None),
         "ai_model": row["ai_model"],
+        "nima_score": row["nima_score"],
+        "nima_model": row["nima_model"],
         "created_at": row["created_at"]
     }
 

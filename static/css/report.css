@@ -146,6 +146,41 @@ body {
 .ai-name { color: #1f2937; }
 .ai-reading { font-weight: 700; color: #6d28d9; white-space: nowrap; }
 
+/* ---------- second AI opinion (NIMA), deliberately set apart ---------- */
+.nima-block { border-left: 5px solid #0891b2; }
+.nima-score { display: flex; align-items: baseline; gap: 4px; margin: 4px 0 10px; }
+.nima-num {
+    font-size: 36px; font-weight: 800; line-height: 1;
+    font-variant-numeric: tabular-nums; color: #0e7490;
+}
+.nima-den { font-size: 16px; font-weight: 700; color: #6b7280; }
+.nima-band { background: #ecfeff; color: #0e7490; }
+
+/* What the designer reads first: the verdict on this image, then one
+   next step. Deliberately the loudest text in this block. */
+.nima-feedback {
+    font-size: 14.5px; font-weight: 600; line-height: 1.6;
+    color: #111827; margin: 0 0 10px;
+}
+.nima-advice {
+    color: #155e75; background: #ecfeff; border-left: 3px solid #06b6d4;
+    border-radius: 0 8px 8px 0; padding: 10px 12px; font-size: 13.5px;
+    line-height: 1.55; margin: 0 0 12px;
+}
+.nima-next {
+    display: block; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: #0891b2; margin-bottom: 4px;
+}
+
+/* Small print: what the number means, then what NIMA is. Kept quiet so
+   it supports the message instead of crowding it. */
+.nima-fine { color: #9ca3af; font-size: 12px; line-height: 1.55; }
+.nima-separate {
+    color: #6b7280; font-size: 12.5px; line-height: 1.6; margin-top: 10px;
+    padding-top: 10px; border-top: 1px dashed #a5f3fc;
+}
+
 /* ---------- technical detail, folded away ---------- */
 .tech {
     background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
@@ -195,14 +230,24 @@ body {
 }
 
 /* ---------- printing / save as PDF ---------- */
+@page { margin: 14mm; }
 @media print {
-    body { background: #fff; font-size: 12px; }
-    .doc { max-width: none; padding: 0; }
+    body { background: #fff; font-size: 12px; color: #111827; }
+    .doc { max-width: none; padding: 0; box-shadow: none; }
     .doc-top { background: #fff; color: #111827; border: 1px solid #ddd;
         margin-bottom: 14px; }
     .doc-kind { color: #6b7280; }
-    .no-print { display: none !important; }
-    .doc-block, .tech { box-shadow: none; break-inside: avoid; page-break-inside: avoid; }
-    .tech > summary::after { content: ""; }
+
+    /* navigation, buttons and technical controls never go on paper */
+    .no-print, .doc-actions, .tech { display: none !important; }
+
+    /* keep the colours that carry meaning (scores, bars, palette) */
+    .score-card, .grade, .band, .bar, .bar i, .palette span {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .doc-block { box-shadow: none; break-inside: avoid; page-break-inside: avoid; }
     .doc-preview { max-height: 260px; }
+    a { text-decoration: none; color: inherit; }
 }

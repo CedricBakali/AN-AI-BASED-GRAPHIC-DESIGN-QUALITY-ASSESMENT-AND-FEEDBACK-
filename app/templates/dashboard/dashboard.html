@@ -215,6 +215,9 @@
                     enctype="multipart/form-data"
                     class="upload-form">
 
+                    {# The XHR uploader builds its body with FormData(form),
+                       so this field rides along automatically. #}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                     <label class="upload-area">
 
